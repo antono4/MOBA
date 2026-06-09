@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS ARENA - 5v5 MOBA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        /* Start Screen */
+        #startScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a0f2e 50%, #0f1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        
+        #startScreen.hidden { opacity: 0; pointer-events: none; }
+        
+        .game-logo {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #6366f1, #ec4899, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 50px rgba(99, 102, 241, 0.5);
+        }
+        
+        .game-subtitle {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-select {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 600px;
+        }
+        
+        .hero-card {
+            width: 120px;
+            padding: 1rem;
+            background: rgba(30, 30, 50, 0.8);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .hero-card:hover { border-color: #6366f1; transform: scale(1.05); }
+        .hero-card.selected { border-color: #ec4899; background: rgba(236, 72, 153, 0.2); }
+        
+        .hero-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .hero-name { font-weight: 600; font-size: 0.9rem; }
+        .hero-role { font-size: 0.75rem; color: #94a3b8; }
+        
+        .start-btn {
+            padding: 1rem 3rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+        
+        /* Game UI */
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        #gameUI {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 2rem;
+            z-index: 100;
+        }
+        
+        #gameUI.visible { display: flex; }
+        
+        .ui-panel {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .hp-bar {
+            width: 200px;
+            height: 20px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            transition: width 0.3s;
+        }
+        
+        .hp-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .stat-icon { font-size: 1rem; }
+        .stat-value { font-weight: 600; color: #fbbf24; }
+        
+        /* Minimap */
+        #minimap {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            z-index: 100;
+        }
+        
+        #minimap.visible { display: block; }
+        
+        #minimapCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Controls Info */
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.8rem;
+            display: none;
+            z-index: 100;
+        }
+        
+        #controls.visible { display: block; }
+        
+        #controls h4 { color: #6366f1; margin-bottom: 0.5rem; }
+        #controls p { color: #94a3b8; margin: 0.25rem 0; }
+        #controls span { color: #fff; font-weight: 600; }
+        
+        /* Game Over Screen */
+        #gameOver {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        #gameOver.visible { display: flex; }
+        
+        #gameOver h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        #gameOver.victory h1 { color: #22c55e; }
+        #gameOver.defeat h1 { color: #ef4444; }
+        
+        #gameOver p { color: #94a3b8; margin-bottom: 2rem; }
+        
+        /* Scoreboard */
+        #scoreboard {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            display: none;
+            z-index: 100;
+            min-width: 150px;
+        }
+        
+        #scoreboard.visible { display: block; }
+        
+        .score-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin: 0.25rem 0;
+        }
+        
+        .score-team.player { background: rgba(34, 197, 94, 0.2); }
+        .score-team.enemy { background: rgba(239, 68, 68, 0.2); }
+        
+        .score-label { font-weight: 600; }
+        .score-value { font-size: 1.5rem; font-weight: 700; }
+        
+        .player .score-value { color: #22c55e; }
+        .enemy .score-value { color: #ef4444; }
+        
+        /* Kill Feed */
+        #killFeed {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            z-index: 100;
+            display: none;
+        }
+        
+        #killFeed.visible { display: block; }
+        
+        .kill-entry {
+            background: rgba(15, 23, 42, 0.9);
+            border-left: 3px solid #ef4444;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .kill-entry.assist { border-left-color: #6366f1; }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <div class="game-logo">⚔️ NEXUS ARENA</div>
+        <div class="game-subtitle">5v5 Multiplayer Online Battle Arena</div>
+        
+        <div class="hero-select">
+            <div class="hero-card selected" data-hero="mage">
+                <div class="hero-icon">🔮</div>
+                <div class="hero-name">Kael</div>
+                <div class="hero-role">Mage</div>
+            </div>
+            <div class="hero-card" data-hero="assassin">
+                <div class="hero-icon">🗡️</div>
+                <div class="hero-name">Raven</div>
+                <div class="hero-role">Assassin</div>
+            </div>
+            <div class="hero-card" data-hero="tank">
+                <div class="hero-icon">🛡️</div>
+                <div class="hero-name">Titan</div>
+                <div class="hero-role">Tank</div>
+            </div>
+            <div class="hero-card" data-hero="marksman">
+                <div class="hero-icon">🏹</div>
+                <div class="hero-name">Viper</div>
+                <div class="hero-role">Marksman</div>
+            </div>
+        </div>
+        
+        <button class="start-btn" id="startBtn">🎮 START BATTLE</button>
+    </div>
+    
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- Game UI -->
+    <div id="gameUI">
+        <div class="ui-panel">
+            <div class="hp-bar">
+                <div class="hp-fill" id="playerHpFill"></div>
+                <div class="hp-text" id="playerHpText">100 / 100</div>
+            </div>
+            <div class="stat-row">
+                <span class="stat-icon">⚔️</span>
+                <span class="stat-value" id="playerLevel">LV 1</span>
+                <span class="stat-icon">💰</span>
+                <span class="stat-value" id="playerGold">0</span>
+                <span class="stat-icon">⚡</span>
+                <span class="stat-value" id="playerKills">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Minimap -->
+    <div id="minimap">
+        <canvas id="minimapCanvas"></canvas>
+    </div>
+    
+    <!-- Controls Info -->
+    <div id="controls">
+        <h4>🎮 Controls</h4>
+        <p><span>WASD</span> - Move</p>
+        <p><span>Left Click</span> - Attack / Lock Target</p>
+        <p><span>Q</span> - Skill 1</p>
+        <p><span>E</span> - Skill 2</p>
+        <p><span>R</span> - Ultimate</p>
+        <p><span>T</span> - Release Target</p>
+        <p><span>Space</span> - Attack Nearest</p>
+    </div>
+    
+    <!-- Scoreboard -->
+    <div id="scoreboard">
+        <div class="score-team player">
+            <span class="score-label">🟢 Your Team</span>
+            <span class="score-value" id="playerScore">0</span>
+        </div>
+        <div class="score-team enemy">
+            <span class="score-label">🔴 Enemy</span>
+            <span class="score-value" id="enemyScore">0</span>
+        </div>
+    </div>
+    
+    <!-- Kill Feed -->
+    <div id="killFeed"></div>
+    
+    <!-- Game Over Screen -->
+    <div id="gameOver">
+        <h1 id="gameOverTitle">VICTORY</h1>
+        <p id="gameOverStats">You destroyed 5 towers!</p>
+        <button class="start-btn" onclick="location.reload()">🔄 Play Again</button>
+    </div>
+
+    <script>
+    // ============================================
+    // NEXUS ARENA - Complete MOBA Game
+    // ============================================
+    
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const minimapCanvas = document.getElementById('minimapCanvas');
+    const minimapCtx = minimapCanvas.getContext('2d');
+    
+    // Game Constants
+    const TILE_SIZE = 40;
+    const MAP_WIDTH = 40;
+    const MAP_HEIGHT = 30;
+    const CANVAS_WIDTH = MAP_WIDTH * TILE_SIZE;
+    const CANVAS_HEIGHT = MAP_HEIGHT * TILE_SIZE;
+    
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    minimapCanvas.width = 200;
+    minimapCanvas.height = 150;
+    
+    // Game State
+    let gameState = 'menu'; // menu, playing, paused, gameover
+    let selectedHero = 'mage';
+    let camera = { x: 0, y: 0 };
+    let lastTime = 0;
+    let gameTime = 0;
+    
+    // Teams
+    let playerTeam = [];
+    let enemyTeam = [];
+    let player = null;
+    let projectiles = [];
+    let particles = [];
+    let damageNumbers = [];
+    
+    // Map elements
+    let towers = [];
+    let minions = [];
+    let jungleCamps = [];
+    let nexus = [];
+    
+    // Input
+    let keys = {};
+    let mousePos = { x: 0, y: 0 };
+    let mouseWorldPos = { x: 0, y: 0 };
+    
+    // ============================================
+    // HERO DEFINITIONS
+    // ============================================
+    
+    const HEROES = {
+        mage: {
+            name: 'Kael',
+            icon: '🔮',
+            color: '#8b5cf6',
+            maxHp: 550,
+            mana: 400,
+            attack: 65,
+            attackRange: 200,
+            moveSpeed: 3.5,
+            skills: [
+                { name: 'Void Bolt', damage: 200, cooldown: 5, mana: 60, range: 300, type: 'skillshot' },
+                { name: 'Phase Shift', damage: 150, cooldown: 8, mana: 80, type: 'dash', shield: 100 },
+                { name: 'Void Storm', damage: 80, cooldown: 12, mana: 120, type: 'aoe', duration: 4 }
+            ],
+            ultimate: { name: 'Sentinel Judgment', damage: 600, cooldown: 100, mana: 200, type: 'global' }
+        },
+        assassin: {
+            name: 'Raven',
+            icon: '🗡️',
+            color: '#dc2626',
+            maxHp: 500,
+            mana: 250,
+            attack: 85,
+            attackRange: 120,
+            moveSpeed: 4.5,
+            skills: [
+                { name: 'Shadow Strike', damage: 280, cooldown: 6, mana: 50, range: 250, type: 'dash' },
+                { name: 'Smoke Bomb', damage: 0, cooldown: 15, mana: 60, type: 'aoe', stealth: 3 },
+                { name: 'Backstab', damage: 350, cooldown: 8, mana: 70, range: 100, type: 'melee' }
+            ],
+            ultimate: { name: 'Death Mark', damage: 800, cooldown: 90, mana: 150, type: 'execute' }
+        },
+        tank: {
+            name: 'Titan',
+            icon: '🛡️',
+            color: '#0891b2',
+            maxHp: 900,
+            mana: 300,
+            attack: 55,
+            attackRange: 100,
+            moveSpeed: 3,
+            skills: [
+                { name: 'Shield Bash', damage: 150, cooldown: 6, mana: 50, range: 150, type: 'stun' },
+                { name: 'Fortify', damage: 0, cooldown: 14, mana: 80, type: 'buff', armor: 50 },
+                { name: 'Ground Slam', damage: 200, cooldown: 10, mana: 100, range: 200, type: 'aoe' }
+            ],
+            ultimate: { name: 'Unstoppable', damage: 400, cooldown: 80, mana: 180, type: 'aoe', cc: 2 }
+        },
+        marksman: {
+            name: 'Viper',
+            icon: '🏹',
+            color: '#22c55e',
+            maxHp: 480,
+            mana: 280,
+            attack: 75,
+            attackRange: 280,
+            moveSpeed: 3.2,
+            skills: [
+                { name: 'Piercing Arrow', damage: 250, cooldown: 7, mana: 70, range: 400, type: 'skillshot' },
+                { name: 'Escape', damage: 100, cooldown: 10, mana: 60, type: 'dash' },
+                { name: 'Multi-shot', damage: 150, cooldown: 12, mana: 100, range: 300, type: 'cone' }
+            ],
+            ultimate: { name: 'Rain of Arrows', damage: 500, cooldown: 100, mana: 200, type: 'global' }
+        }
+    };
+    
+    // ============================================
+    // CLASSES
+    // ============================================
+    
+    class Entity {
+        constructor(x, y, team) {
+            this.x = x;
+            this.y = y;
+            this.team = team; // 'player' or 'enemy'
+            this.width = 30;
+            this.height = 30;
+            this.currentHp = 100;
+            this.maxHp = 100;
+            this.attack = 20;
+            this.attackRange = 100;
+            this.attackCooldown = 0;
+            this.attackSpeed = 1;
+            this.moveSpeed = 3;
+            this.level = 1;
+            this.gold = 0;
+            this.exp = 0;
+            this.isDead = false;
+            this.target = null;
+            this.isSelected = false;
+            this.radius = 15;
+        }
+        
+        update(dt) {
+            if (this.isDead) return;
+            
+            // Update cooldowns
+            if (this.attackCooldown > 0) this.attackCooldown -= dt;
+            
+            // Regeneration
+            if (this.currentHp < this.maxHp) {
+                this.currentHp += 2 * dt;
+                this.currentHp = Math.min(this.currentHp, this.maxHp);
+            }
+            
+            // AI behavior
+            this.aiUpdate(dt);
+        }
+        
+        aiUpdate(dt) {
+            // Override in subclasses
+        }
+        
+        takeDamage(amount, source) {
+            if (this.isDead) return;
+            
+            this.currentHp -= amount;
+            
+            // Show damage number
+            damageNumbers.push({
+                x: this.x,
+                y: this.y - 20,
+                value: Math.round(amount),
+                life: 1,
+                color: source.team === 'player' ? '#ef4444' : '#22c55e'
+            });
+            
+            // Create hit particles
+            for (let i = 0; i < 5; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 100,
+                    vy: (Math.random() - 0.5) * 100,
+                    life: 0.3,
+                    color: '#ef4444',
+                    size: 4
+                });
+            }
+            
+            if (this.currentHp <= 0) {
+                this.die(source);
+            }
+        }
+        
+        die(killer) {
+            this.isDead = true;
+            
+            // Award gold and exp
+            if (killer) {
+                killer.gold += 300;
+                killer.exp += 200;
+                killer.kills = (killer.kills || 0) + 1;
+                
+                // Add to kill feed
+                addKillFeed(killer, this);
+                
+                // Check level up
+                killer.checkLevelUp();
+            }
+            
+            // Death particles
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 200,
+                    vy: (Math.random() - 0.5) * 200,
+                    life: 1,
+                    color: this.team === 'player' ? '#22c55e' : '#ef4444',
+                    size: 6
+                });
+            }
+            
+            // Respawn after delay
+            setTimeout(() => this.respawn(), 10);
+        }
+        
+        respawn() {
+            this.isDead = false;
+            this.currentHp = this.maxHp;
+            this.x = this.team === 'player' ? 200 : CANVAS_WIDTH - 200;
+            this.y = CANVAS_HEIGHT / 2;
+        }
+        
+        checkLevelUp() {
+            const expNeeded = this.level * 300;
+            while (this.exp >= expNeeded && this.level < 15) {
+                this.exp -= expNeeded;
+                this.level++;
+                this.maxHp += 85;
+                this.currentHp = this.maxHp;
+                this.attack += 5;
+                this.attackRange += 5;
+                
+                // Level up effect
+                for (let i = 0; i < 30; i++) {
+                    particles.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: (Math.random() - 0.5) * 150,
+                        vy: (Math.random() - 0.5) * 150 - 100,
+                        life: 1,
+                        color: '#fbbf24',
+                        size: 5
+                    });
+                }
+            }
+        }
+        
+        attackTarget(target) {
+            if (this.attackCooldown > 0 || !target || target.isDead) return;
+            
+            const dist = this.distanceTo(target);
+            if (dist <= this.attackRange) {
+                // Melee attack
+                target.takeDamage(this.attack, this);
+                this.attackCooldown = 1 / this.attackSpeed;
+                
+                // Attack animation
+                this.isSelected = true;
+                setTimeout(() => this.isSelected = false, 100);
+            }
+        }
+        
+        distanceTo(other) {
+            return Math.sqrt((this.x - other.x) ** 2 + (this.y - other.y) ** 2);
+        }
+        
+        draw() {
+            if (this.isDead) return;
+            
+            // Draw entity
+            ctx.save();
+            
+            // Glow effect for selected
+            if (this.isSelected) {
+                ctx.shadowColor = this.color || '#fff';
+                ctx.shadowBlur = 20;
+            }
+            
+            // Body
+            ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Inner circle
+            ctx.fillStyle = this.color || '#fff';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Icon
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.icon || '⚔️', this.x, this.y);
+            
+            ctx.restore();
+            
+            // HP bar
+            this.drawHpBar();
+        }
+        
+        drawHpBar() {
+            const barWidth = 40;
+            const barHeight = 4;
+            const x = this.x - barWidth / 2;
+            const y = this.y - this.radius - 10;
+            
+            // Background
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(x, y, barWidth, barHeight);
+            
+            // HP fill
+            const hpPercent = this.currentHp / this.maxHp;
+            ctx.fillStyle = hpPercent > 0.5 ? '#22c55e' : hpPercent > 0.25 ? '#fbbf24' : '#ef4444';
+            ctx.fillRect(x, y, barWidth * hpPercent, barHeight);
+            
+            // Border
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, barWidth, barHeight);
+        }
+    }
+    
+    class Hero extends Entity {
+        constructor(x, y, team, heroType) {
+            super(x, y, team);
+            const heroData = HEROES[heroType];
+            Object.assign(this, heroData);
+            this.heroType = heroType;
+            this.maxHp = heroData.maxHp;
+            this.currentHp = this.maxHp;
+            this.mana = heroData.mana;
+            this.maxMana = heroData.mana;
+            this.attack = heroData.attack;
+            this.attackRange = heroData.attackRange;
+            this.moveSpeed = heroData.moveSpeed;
+            this.attackSpeed = 1;
+            this.kills = 0;
+            this.assists = 0;
+            
+            this.skillCooldowns = [0, 0, 0];
+            this.ultimateCooldown = 0;
+            this.isChanneling = false;
+            this.channelTime = 0;
+        }
+        
+        update(dt) {
+            if (this.isDead) return;
+            
+            super.update(dt);
+            
+            // Update skill cooldowns
+            for (let i = 0; i < this.skillCooldowns.length; i++) {
+                if (this.skillCooldowns[i] > 0) this.skillCooldowns[i] -= dt;
+            }
+            if (this.ultimateCooldown > 0) this.ultimateCooldown -= dt;
+            
+            // Mana regen
+            if (this.mana < this.maxMana) {
+                this.mana += 5 * dt;
+                this.mana = Math.min(this.mana, this.maxMana);
+            }
+            
+            // Channel check
+            if (this.isChanneling) {
+                this.channelTime -= dt;
+                if (this.channelTime <= 0) {
+                    this.isChanneling = false;
+                }
+            }
+        }
+        
+        useSkill(index) {
+            if (this.isDead || this.isChanneling) return;
+            
+            const skill = this.skills[index];
+            if (!skill || this.skillCooldowns[index] > 0 || this.mana < skill.mana) return;
+            
+            this.mana -= skill.mana;
+            this.skillCooldowns[index] = skill.cooldown;
+            
+            // Execute skill based on type
+            this.executeSkill(skill, index);
+        }
+        
+        executeSkill(skill, index) {
+            const targetPos = this.target ? { x: this.target.x, y: this.target.y } : { x: this.x, y: this.y + 100 };
+            
+            switch (skill.type) {
+                case 'skillshot':
+                    // Fire projectile
+                    const angle = Math.atan2(targetPos.y - this.y, targetPos.x - this.x);
+                    projectiles.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: Math.cos(angle) * 400,
+                        vy: Math.sin(angle) * 400,
+                        damage: skill.damage,
+                        radius: 15,
+                        owner: this,
+                        color: this.color,
+                        pierce: false,
+                        life: 2
+                    });
+                    break;
+                    
+                case 'dash':
+                    // Dash to target
+                    const dashDist = 150;
+                    const dx = targetPos.x - this.x;
+                    const dy = targetPos.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    this.x += (dx / dist) * dashDist;
+                    this.y += (dy / dist) * dashDist;
+                    
+                    // Damage enemies along path
+                    this.findEnemiesInRange(100).forEach(enemy => {
+                        if (enemy.team !== this.team) {
+                            enemy.takeDamage(skill.damage, this);
+                        }
+                    });
+                    
+                    // Shield effect
+                    if (skill.shield) {
+                        this.currentHp = Math.min(this.currentHp + skill.shield, this.maxHp);
+                    }
+                    break;
+                    
+                case 'aoe':
+                    // Area damage
+                    const aoeRadius = 150;
+                    this.findEnemiesInRange(aoeRadius).forEach(enemy => {
+                        if (enemy.team !== this.team) {
+                            enemy.takeDamage(skill.damage, this);
+                        }
+                    });
+                    
+                    // Visual effect
+                    for (let i = 0; i < 20; i++) {
+                        particles.push({
+                            x: this.x,
+                            y: this.y,
+                            vx: (Math.random() - 0.5) * 200,
+                            vy: (Math.random() - 0.5) * 200,
+                            life: 0.8,
+                            color: this.color,
+                            size: 8
+                        });
+                    }
+                    break;
+                    
+                case 'buff':
+                    // Self buff (handled automatically)
+                    this.armor = (this.armor || 0) + (skill.armor || 0);
+                    setTimeout(() => this.armor -= (skill.armor || 0), 5000);
+                    break;
+            }
+            
+            // Skill use particles
+            for (let i = 0; i < 15; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 100,
+                    vy: (Math.random() - 0.5) * 100,
+                    life: 0.5,
+                    color: '#6366f1',
+                    size: 5
+                });
+            }
+        }
+        
+        useUltimate() {
+            if (this.isDead || this.ultimateCooldown > 0 || this.mana < this.ultimate.mana) return;
+            
+            this.mana -= this.ultimate.mana;
+            this.ultimateCooldown = this.ultimate.cooldown;
+            
+            // Ultimate based on type
+            const targetPos = this.target ? { x: this.target.x, y: this.target.y } : { x: this.x, y: this.y };
+            
+            switch (this.ultimate.type) {
+                case 'global':
+                    // Hit all enemies
+                    this.findEnemiesInRange(500).forEach(enemy => {
+                        if (enemy.team !== this.team) {
+                            enemy.takeDamage(this.ultimate.damage, this);
+                        }
+                    });
+                    break;
+                    
+                case 'execute':
+                    // High damage to single target
+                    if (this.target && !this.target.isDead) {
+                        this.target.takeDamage(this.ultimate.damage, this);
+                        this.isChanneling = true;
+                        this.channelTime = 2;
+                    }
+                    break;
+                    
+                case 'aoe':
+                    // Massive AoE
+                    this.findEnemiesInRange(300).forEach(enemy => {
+                        if (enemy.team !== this.team) {
+                            enemy.takeDamage(this.ultimate.damage, this);
+                            // Stun effect
+                            enemy.stunned = this.ultimate.cc || 0;
+                        }
+                    });
+                    break;
+            }
+            
+            // Ultimate visual
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 300,
+                    vy: (Math.random() - 0.5) * 300,
+                    life: 1.5,
+                    color: '#fbbf24',
+                    size: 10
+                });
+            }
+        }
+        
+        findEnemiesInRange(range) {
+            const enemies = this.team === 'player' ? enemyTeam : playerTeam;
+            return enemies.filter(e => !e.isDead && this.distanceTo(e) <= range);
+        }
+        
+        draw() {
+            if (this.isDead) return;
+            
+            super.draw();
+            
+            // Draw skills indicator
+            this.drawSkills();
+            
+            // Draw ultimate indicator
+            this.drawUltimate();
+            
+            // Draw target line
+            if (this.target && !this.target.isDead) {
+                ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.target.x, this.target.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+        
+        drawSkills() {
+            const y = 20;
+            const spacing = 25;
+            
+            for (let i = 0; i < 3; i++) {
+                const x = CANVAS_WIDTH / 2 - spacing * 1.5 + i * spacing;
+                const skill = this.skills[i];
+                const cd = this.skillCooldowns[i];
+                const ready = cd <= 0 && this.mana >= skill.mana;
+                
+                // Background
+                ctx.fillStyle = ready ? '#1e293b' : '#0f172a';
+                ctx.fillRect(x - 10, CANVAS_HEIGHT - y - 20, 20, 20);
+                
+                // Cooldown overlay
+                if (cd > 0) {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    const cdHeight = (cd / skill.cooldown) * 20;
+                    ctx.fillRect(x - 10, CANVAS_HEIGHT - y - 20 + 20 - cdHeight, 20, cdHeight);
+                }
+                
+                // Border
+                ctx.strokeStyle = ready ? '#6366f1' : '#334155';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - 10, CANVAS_HEIGHT - y - 20, 20, 20);
+                
+                // Key
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(['Q', 'E', 'R'][i], x, CANVAS_HEIGHT - y - 5);
+            }
+        }
+        
+        drawUltimate() {
+            const x = CANVAS_WIDTH / 2;
+            const y = 20;
+            const ready = this.ultimateCooldown <= 0 && this.mana >= this.ultimate.mana;
+            
+            // Background
+            ctx.fillStyle = ready ? '#1e293b' : '#0f172a';
+            ctx.fillRect(x - 15, CANVAS_HEIGHT - y - 25, 30, 25);
+            
+            // Cooldown overlay
+            if (this.ultimateCooldown > 0) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                const cdHeight = (this.ultimateCooldown / this.ultimate.cooldown) * 25;
+                ctx.fillRect(x - 15, CANVAS_HEIGHT - y - 25 + 25 - cdHeight, 30, cdHeight);
+            }
+            
+            // Border
+            ctx.strokeStyle = ready ? '#fbbf24' : '#334155';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x - 15, CANVAS_HEIGHT - y - 25, 30, 25);
+            
+            // Key
+            ctx.fillStyle = ready ? '#fbbf24' : '#fff';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('R', x, CANVAS_HEIGHT - y - 8);
+        }
+    }
+    
+    class Minion extends Entity {
+        constructor(x, y, team, type = 'melee') {
+            super(x, y, team);
+            this.type = type;
+            this.radius = 10;
+            this.maxHp = type === 'melee' ? 400 : type === 'ranged' ? 300 : 600;
+            this.currentHp = this.maxHp;
+            this.attack = type === 'siege' ? 80 : type === 'melee' ? 30 : 25;
+            this.attackRange = type === 'ranged' ? 150 : 50;
+            this.attackSpeed = 0.8;
+            this.moveSpeed = 2;
+            this.goldValue = type === 'siege' ? 90 : type === 'melee' ? 60 : 45;
+            this.expValue = type === 'siege' ? 100 : type === 'melee' ? 65 : 50;
+            
+            // Pathfinding
+            this.targetX = team === 'player' ? CANVAS_WIDTH - 100 : 100;
+            this.targetY = CANVAS_HEIGHT / 2;
+            this.lane = 'mid';
+        }
+        
+        aiUpdate(dt) {
+            if (this.isDead) return;
+            
+            // Find target (enemy minion, tower, or hero)
+            let target = null;
+            let minDist = Infinity;
+            
+            // Check enemy minions
+            const enemyMinions = this.team === 'player' ? enemyMinions : playerMinions;
+            enemyMinions.forEach(m => {
+                if (!m.isDead) {
+                    const dist = this.distanceTo(m);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = m;
+                    }
+                }
+            });
+            
+            // Check enemy towers
+            towers.forEach(t => {
+                if (t.team !== this.team && !t.isDestroyed) {
+                    const dist = this.distanceTo(t);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = t;
+                    }
+                }
+            });
+            
+            // Check enemy heroes
+            const enemyHeroes = this.team === 'player' ? enemyTeam : playerTeam;
+            enemyHeroes.forEach(h => {
+                if (!h.isDead) {
+                    const dist = this.distanceTo(h);
+                    if (dist < minDist && dist < 300) {
+                        minDist = dist;
+                        target = h;
+                    }
+                }
+            });
+            
+            if (target && minDist <= this.attackRange) {
+                // Attack
+                this.attackTarget(target);
+            } else {
+                // Move towards target
+                const dx = this.targetX - this.x;
+                const dy = this.targetY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 5) {
+                    this.x += (dx / dist) * this.moveSpeed;
+                    this.y += (dy / dist) * this.moveSpeed;
+                }
+            }
+            
+            // Update target based on lane position
+            this.updateTargetPosition();
+        }
+        
+        updateTargetPosition() {
+            // Move towards enemy nexus
+            if (this.team === 'player') {
+                this.targetX = Math.max(this.targetX - 0.5, 200);
+            } else {
+                this.targetX = Math.min(this.targetX + 0.5, CANVAS_WIDTH - 200);
+            }
+        }
+        
+        die(killer) {
+            super.die(killer);
+            
+            // Award gold to killer's team
+            if (killer && killer.team === 'player') {
+                playerTeam.forEach(h => {
+                    if (!h.isDead) h.gold += this.goldValue / 5;
+                });
+            } else if (killer && killer.team === 'enemy') {
+                enemyTeam.forEach(h => {
+                    if (!h.isDead) h.gold += this.goldValue / 5;
+                });
+            }
+        }
+        
+        draw() {
+            if (this.isDead) return;
+            
+            ctx.save();
+            
+            // Body
+            ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Type indicator
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const icons = { melee: '⚔️', ranged: '🏹', siege: '💣' };
+            ctx.fillText(icons[this.type] || '⚔️', this.x, this.y);
+            
+            ctx.restore();
+            
+            this.drawHpBar();
+        }
+    }
+    
+    class Tower extends Entity {
+        constructor(x, y, team, lane) {
+            super(x, y, team);
+            this.lane = lane;
+            this.radius = 30;
+            this.maxHp = 3000;
+            this.currentHp = this.maxHp;
+            this.attack = 150;
+            this.attackRange = 300;
+            this.attackSpeed = 0.5;
+            this.isDestroyed = false;
+            this.aggroRange = 350;
+            this.target = null;
+            
+            // Set spawn point
+            this.spawnX = x;
+            this.spawnY = y;
+        }
+        
+        update(dt) {
+            if (this.isDestroyed) return;
+            
+            super.update(dt);
+            
+            // Find target
+            const enemies = this.team === 'player' ? enemyTeam : playerTeam;
+            const enemyMinions = this.team === 'player' ? enemyMinions : playerMinions;
+            
+            // Priority: minions in range > heroes attacking
+            let target = null;
+            let minDist = this.aggroRange;
+            
+            // Check minions
+            enemyMinions.forEach(m => {
+                if (!m.isDead) {
+                    const dist = this.distanceTo(m);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = m;
+                    }
+                }
+            });
+            
+            // Check heroes attacking tower
+            enemies.forEach(h => {
+                if (!h.isDead) {
+                    const dist = this.distanceTo(h);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = h;
+                    }
+                }
+            });
+            
+            this.target = target;
+            
+            if (target && minDist <= this.attackRange) {
+                this.attackTarget(target);
+            }
+        }
+        
+        die(killer) {
+            this.isDestroyed = true;
+            
+            // Award global gold
+            const team = killer ? killer.team : 'player';
+            const targetTeam = team === 'player' ? playerTeam : enemyTeam;
+            
+            targetTeam.forEach(h => {
+                if (!h.isDead) h.gold += 500;
+            });
+            
+            // Add to kill feed
+            if (killer) {
+                addKillFeed(killer, this);
+            }
+            
+            // Check win condition
+            checkWinCondition();
+            
+            // Explosion effect
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 300,
+                    vy: (Math.random() - 0.5) * 300,
+                    life: 2,
+                    color: '#fbbf24',
+                    size: 15
+                });
+            }
+        }
+        
+        draw() {
+            if (this.isDestroyed) return;
+            
+            ctx.save();
+            
+            // Tower base
+            ctx.fillStyle = this.team === 'player' ? '#166534' : '#991b1b';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Tower body
+            ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Tower top
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y - this.radius);
+            ctx.lineTo(this.x - this.radius * 0.5, this.y + this.radius * 0.5);
+            ctx.lineTo(this.x + this.radius * 0.5, this.y + this.radius * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Range indicator when player is near
+            if (this.team !== player?.team) {
+                const distToPlayer = player ? this.distanceTo(player) : 999;
+                if (distToPlayer < 400) {
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.attackRange, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            ctx.restore();
+            
+            this.drawHpBar();
+        }
+        
+        drawHpBar() {
+            const barWidth = 60;
+            const barHeight = 8;
+            const x = this.x - barWidth / 2;
+            const y = this.y - this.radius - 20;
+            
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(x, y, barWidth, barHeight);
+            
+            const hpPercent = this.currentHp / this.maxHp;
+            ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444';
+            ctx.fillRect(x, y, barWidth * hpPercent, barHeight);
+            
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, barWidth, barHeight);
+        }
+    }
+    
+    // ============================================
+    // GAME FUNCTIONS
+    // ============================================
+    
+    function initGame() {
+        // Clear previous state
+        playerTeam = [];
+        enemyTeam = [];
+        projectiles = [];
+        particles = [];
+        damageNumbers = [];
+        minions = [];
+        towers = [];
+        
+        // Create player hero
+        player = new Hero(200, CANVAS_HEIGHT / 2, 'player', selectedHero);
+        playerTeam.push(player);
+        
+        // Create allied heroes (AI)
+        const allyHeroes = ['mage', 'tank', 'marksman'];
+        allyHeroes.forEach((type, i) => {
+            const hero = new Hero(200, CANVAS_HEIGHT / 2 + (i - 1) * 100, 'player', type);
+            hero.isAI = true;
+            playerTeam.push(hero);
+        });
+        
+        // Create enemy heroes
+        const enemyHeroes = ['mage', 'assassin', 'tank'];
+        enemyHeroes.forEach((type, i) => {
+            const hero = new Hero(CANVAS_WIDTH - 200, CANVAS_HEIGHT / 2 + (i - 1) * 100, 'enemy', type);
+            hero.isAI = true;
+            enemyTeam.push(hero);
+        });
+        
+        // Create towers
+        // Player towers (bottom lane)
+        towers.push(new Tower(600, CANVAS_HEIGHT - 150, 'player', 'bottom'));
+        towers.push(new Tower(900, CANVAS_HEIGHT - 150, 'player', 'bottom'));
+        
+        // Enemy towers (bottom lane)
+        towers.push(new Tower(CANVAS_WIDTH - 600, 150, 'enemy', 'bottom'));
+        towers.push(new Tower(CANVAS_WIDTH - 900, 150, 'enemy', 'bottom'));
+        
+        // Mid lane towers
+        towers.push(new Tower(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 200, 'player', 'mid'));
+        towers.push(new Tower(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 200, 'enemy', 'mid'));
+        
+        // Top lane towers
+        towers.push(new Tower(150, 600, 'player', 'top'));
+        towers.push(new Tower(150, 900, 'player', 'top'));
+        towers.push(new Tower(CANVAS_WIDTH - 150, CANVAS_HEIGHT - 600, 'enemy', 'top'));
+        towers.push(new Tower(CANVAS_WIDTH - 150, CANVAS_HEIGHT - 900, 'enemy', 'top'));
+        
+        // Start minion spawning
+        spawnMinions();
+        
+        // Reset camera
+        camera.x = player.x - CANVAS_WIDTH / 2;
+        camera.y = player.y - CANVAS_HEIGHT / 2;
+        
+        gameTime = 0;
+        gameState = 'playing';
+        
+        // Show UI
+        document.getElementById('gameUI').classList.add('visible');
+        document.getElementById('minimap').classList.add('visible');
+        document.getElementById('controls').classList.add('visible');
+        document.getElementById('scoreboard').classList.add('visible');
+        document.getElementById('startScreen').classList.add('hidden');
+    }
+    
+    let minionSpawnInterval;
+    function spawnMinions() {
+        clearInterval(minionSpawnInterval);
+        
+        minionSpawnInterval = setInterval(() => {
+            if (gameState !== 'playing') return;
+            
+            // Spawn player minions
+            for (let i = 0; i < 3; i++) {
+                const minion = new Minion(250 + i * 30, CANVAS_HEIGHT / 2, 'player', i === 2 ? 'siege' : 'melee');
+                minion.targetX = CANVAS_WIDTH - 300;
+                minions.push(minion);
+            }
+            
+            // Spawn ranged minion
+            const ranged = new Minion(250, CANVAS_HEIGHT / 2 + 40, 'player', 'ranged');
+            ranged.targetX = CANVAS_WIDTH - 300;
+            minions.push(ranged);
+            
+            // Spawn enemy minions
+            for (let i = 0; i < 3; i++) {
+                const minion = new Minion(CANVAS_WIDTH - 250 - i * 30, CANVAS_HEIGHT / 2, 'enemy', i === 2 ? 'siege' : 'melee');
+                minion.targetX = 300;
+                minions.push(minion);
+            }
+            
+            const rangedEnemy = new Minion(CANVAS_WIDTH - 250, CANVAS_HEIGHT / 2 - 40, 'enemy', 'ranged');
+            rangedEnemy.targetX = 300;
+            minions.push(rangedEnemy);
+        }, 30000); // Spawn every 30 seconds
+    }
+    
+    function update(dt) {
+        if (gameState !== 'playing') return;
+        
+        gameTime += dt;
+        
+        // Update player
+        updatePlayer(dt);
+        
+        // Update all entities
+        playerTeam.forEach(h => h.update(dt));
+        enemyTeam.forEach(h => h.update(dt));
+        minions.forEach(m => m.update(dt));
+        towers.forEach(t => t.update(dt));
+        
+        // Update projectiles
+        updateProjectiles(dt);
+        
+        // Update particles
+        updateParticles(dt);
+        
+        // Update damage numbers
+        updateDamageNumbers(dt);
+        
+        // Update camera
+        updateCamera();
+        
+        // Update UI
+        updateUI();
+        
+        // Clean up dead minions
+        minions = minions.filter(m => !m.isDead || m.deathTime > 0);
+        minions.forEach(m => {
+            if (m.isDead) {
+                m.deathTime = (m.deathTime || 0) + dt;
+            }
+        });
+        
+        // AI for allied heroes
+        playerTeam.forEach(h => {
+            if (h !== player && h.isAI) {
+                updateAI(h, dt);
+            }
+        });
+        
+        // AI for enemy heroes
+        enemyTeam.forEach(h => {
+            if (h.isAI) {
+                updateAI(h, dt);
+            }
+        });
+    }
+    
+    function updatePlayer(dt) {
+        if (player.isDead) return;
+        
+        // Movement
+        let dx = 0, dy = 0;
+        if (keys['w'] || keys['arrowup']) dy -= 1;
+        if (keys['s'] || keys['arrowdown']) dy += 1;
+        if (keys['a'] || keys['arrowleft']) dx -= 1;
+        if (keys['d'] || keys['arrowright']) dx += 1;
+        
+        if (dx !== 0 || dy !== 0) {
+            const len = Math.sqrt(dx * dx + dy * dy);
+            player.x += (dx / len) * player.moveSpeed;
+            player.y += (dy / len) * player.moveSpeed;
+            
+            // Keep in bounds
+            player.x = Math.max(20, Math.min(CANVAS_WIDTH - 20, player.x));
+            player.y = Math.max(20, Math.min(CANVAS_HEIGHT - 20, player.y));
+        }
+        
+        // Auto attack nearest enemy if space is pressed
+        if (keys[' ']) {
+            autoAttack();
+        }
+    }
+    
+    function autoAttack() {
+        if (!player || player.isDead) return;
+        
+        let nearestEnemy = null;
+        let minDist = Infinity;
+        
+        // Check all enemies
+        const allEnemies = [...enemyTeam, ...minions.filter(m => m.team === 'enemy')];
+        allEnemies.forEach(e => {
+            if (!e.isDead) {
+                const dist = player.distanceTo(e);
+                if (dist < minDist && dist < player.attackRange * 1.5) {
+                    minDist = dist;
+                    nearestEnemy = e;
+                }
+            }
+        });
+        
+        if (nearestEnemy) {
+            player.target = nearestEnemy;
+            player.attackTarget(nearestEnemy);
+        }
+    }
+    
+    function updateAI(hero, dt) {
+        if (hero.isDead) return;
+        
+        // Simple AI: find nearest enemy and attack
+        let nearestEnemy = null;
+        let minDist = Infinity;
+        
+        const allEnemies = [...(hero.team === 'player' ? enemyTeam : playerTeam), 
+                          ...minions.filter(m => m.team !== hero.team)];
+        
+        allEnemies.forEach(e => {
+            if (!e.isDead) {
+                const dist = hero.distanceTo(e);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestEnemy = e;
+                }
+            }
+        });
+        
+        if (nearestEnemy) {
+            hero.target = nearestEnemy;
+            
+            // Move towards enemy if too far
+            if (minDist > hero.attackRange) {
+                const dx = nearestEnemy.x - hero.x;
+                const dy = nearestEnemy.y - hero.y;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                hero.x += (dx / len) * hero.moveSpeed * 0.8;
+                hero.y += (dy / len) * hero.moveSpeed * 0.8;
+            }
+            
+            // Attack if in range
+            if (minDist <= hero.attackRange && hero.attackCooldown <= 0) {
+                hero.attackTarget(nearestEnemy);
+            }
+            
+            // Use skills occasionally
+            if (Math.random() < 0.02 && hero.skillCooldowns[0] <= 0) {
+                hero.useSkill(0);
+            }
+        }
+    }
+    
+    function updateProjectiles(dt) {
+        projectiles.forEach(p => {
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            
+            // Check collision with enemies
+            const targets = p.owner.team === 'player' ? enemyTeam : playerTeam;
+            targets.forEach(e => {
+                if (!e.isDead && !p.hit) {
+                    const dist = Math.sqrt((p.x - e.x) ** 2 + (p.y - e.y) ** 2);
+                    if (dist < p.radius + e.radius) {
+                        e.takeDamage(p.damage, p.owner);
+                        p.hit = true;
+                        
+                        // Impact effect
+                        for (let i = 0; i < 10; i++) {
+                            particles.push({
+                                x: p.x,
+                                y: p.y,
+                                vx: (Math.random() - 0.5) * 150,
+                                vy: (Math.random() - 0.5) * 150,
+                                life: 0.5,
+                                color: p.color,
+                                size: 5
+                            });
+                        }
+                    }
+                }
+            });
+            
+            // Check collision with minions
+            minions.forEach(m => {
+                if (!m.isDead && !p.hit && m.team !== p.owner.team) {
+                    const dist = Math.sqrt((p.x - m.x) ** 2 + (p.y - m.y) ** 2);
+                    if (dist < p.radius + m.radius) {
+                        m.takeDamage(p.damage, p.owner);
+                        p.hit = true;
+                    }
+                }
+            });
+        });
+        
+        // Remove dead projectiles
+        projectiles = projectiles.filter(p => p.life > 0 && !p.hit);
+    }
+    
+    function updateParticles(dt) {
+        particles.forEach(p => {
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            p.vy += 200 * dt; // gravity
+        });
+        
+        particles = particles.filter(p => p.life > 0);
+    }
+    
+    function updateDamageNumbers(dt) {
+        damageNumbers.forEach(d => {
+            d.y -= 50 * dt;
+            d.life -= dt;
+        });
+        
+        damageNumbers = damageNumbers.filter(d => d.life > 0);
+    }
+    
+    function updateCamera() {
+        if (!player) return;
+        
+        // Smooth camera follow
+        const targetX = player.x - CANVAS_WIDTH / 2;
+        const targetY = player.y - CANVAS_HEIGHT / 2;
+        
+        camera.x += (targetX - camera.x) * 0.1;
+        camera.y += (targetY - camera.y) * 0.1;
+        
+        // Clamp camera
+        camera.x = Math.max(0, Math.min(CANVAS_WIDTH - CANVAS_WIDTH, camera.x));
+        camera.y = Math.max(0, Math.min(CANVAS_HEIGHT - CANVAS_HEIGHT, camera.y));
+    }
+    
+    function updateUI() {
+        if (!player) return;
+        
+        // Update HP bar
+        const hpPercent = (player.currentHp / player.maxHp) * 100;
+        document.getElementById('playerHpFill').style.width = hpPercent + '%';
+        document.getElementById('playerHpText').textContent = 
+            Math.round(player.currentHp) + ' / ' + player.maxHp;
+        
+        // Update stats
+        document.getElementById('playerLevel').textContent = 'LV ' + player.level;
+        document.getElementById('playerGold').textContent = Math.round(player.gold);
+        document.getElementById('playerKills').textContent = player.kills;
+        
+        // Update scoreboard
+        document.getElementById('playerScore').textContent = playerTeam.filter(h => !h.isDead).length;
+        document.getElementById('enemyScore').textContent = enemyTeam.filter(h => !h.isDead).length;
+    }
+    
+    function draw() {
+        // Clear canvas
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        
+        // Draw map grid
+        drawMap();
+        
+        // Draw lanes
+        drawLanes();
+        
+        // Draw jungle areas
+        drawJungle();
+        
+        // Draw towers
+        towers.forEach(t => t.draw());
+        
+        // Draw minions
+        minions.forEach(m => m.draw());
+        
+        // Draw heroes
+        playerTeam.forEach(h => h.draw());
+        enemyTeam.forEach(h => h.draw());
+        
+        // Draw projectiles
+        projectiles.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Trail
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x - p.vx * 0.05, p.y - p.vy * 0.05);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        });
+        
+        // Draw particles
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        
+        // Draw damage numbers
+        damageNumbers.forEach(d => {
+            ctx.globalAlpha = d.life;
+            ctx.fillStyle = d.color;
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('-' + d.value, d.x, d.y);
+        });
+        ctx.globalAlpha = 1;
+        
+        // Draw minimap
+        drawMinimap();
+        
+        // Draw game time
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(formatTime(gameTime), CANVAS_WIDTH / 2, 30);
+    }
+    
+    function drawMap() {
+        // Draw grass areas
+        ctx.fillStyle = '#1a472a';
+        
+        // Top jungle
+        ctx.fillRect(0, 0, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.3);
+        ctx.fillRect(CANVAS_WIDTH * 0.7, 0, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.3);
+        
+        // Bottom jungle
+        ctx.fillRect(0, CANVAS_HEIGHT * 0.7, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.3);
+        ctx.fillRect(CANVAS_WIDTH * 0.7, CANVAS_HEIGHT * 0.7, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.3);
+        
+        // River
+        ctx.fillStyle = '#1e40af';
+        ctx.fillRect(CANVAS_WIDTH * 0.4, CANVAS_HEIGHT * 0.4, CANVAS_WIDTH * 0.2, CANVAS_HEIGHT * 0.2);
+        
+        // Grid lines
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < CANVAS_WIDTH; x += TILE_SIZE) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, CANVAS_HEIGHT);
+            ctx.stroke();
+        }
+        for (let y = 0; y < CANVAS_HEIGHT; y += TILE_SIZE) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(CANVAS_WIDTH, y);
+            ctx.stroke();
+        }
+    }
+    
+    function drawLanes() {
+        // Draw lane paths
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 60;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Mid lane
+        ctx.beginPath();
+        ctx.moveTo(100, CANVAS_HEIGHT / 2);
+        ctx.lineTo(CANVAS_WIDTH - 100, CANVAS_HEIGHT / 2);
+        ctx.stroke();
+        
+        // Top lane
+        ctx.beginPath();
+        ctx.moveTo(100, CANVAS_HEIGHT / 2);
+        ctx.lineTo(100, 100);
+        ctx.lineTo(CANVAS_WIDTH - 100, 100);
+        ctx.lineTo(CANVAS_WIDTH - 100, CANVAS_HEIGHT / 2);
+        ctx.stroke();
+        
+        // Bottom lane
+        ctx.beginPath();
+        ctx.moveTo(100, CANVAS_HEIGHT / 2);
+        ctx.lineTo(100, CANVAS_HEIGHT - 100);
+        ctx.lineTo(CANVAS_WIDTH - 100, CANVAS_HEIGHT - 100);
+        ctx.lineTo(CANVAS_WIDTH - 100, CANVAS_HEIGHT / 2);
+        ctx.stroke();
+        
+        ctx.lineCap = 'butt';
+    }
+    
+    function drawJungle() {
+        // Draw jungle camp indicators
+        const camps = [
+            { x: 300, y: 300, name: 'Red Buff' },
+            { x: CANVAS_WIDTH - 300, y: CANVAS_HEIGHT - 300, name: 'Blue Buff' },
+            { x: 300, y: CANVAS_HEIGHT - 300, name: 'Wolf' },
+            { x: CANVAS_WIDTH - 300, y: 300, name: 'Raptor' }
+        ];
+        
+        camps.forEach(camp => {
+            ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+            ctx.beginPath();
+            ctx.arc(camp.x, camp.y, 25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+    }
+    
+    function drawMinimap() {
+        const scaleX = minimapCanvas.width / CANVAS_WIDTH;
+        const scaleY = minimapCanvas.height / CANVAS_HEIGHT;
+        
+        // Background
+        minimapCtx.fillStyle = '#0f172a';
+        minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+        
+        // Lanes
+        minimapCtx.strokeStyle = '#334155';
+        minimapCtx.lineWidth = 2;
+        
+        // Mid lane
+        minimapCtx.beginPath();
+        minimapCtx.moveTo(200 * scaleX, 150 * scaleY);
+        minimapCtx.lineTo(1000 * scaleX, 150 * scaleY);
+        minimapCtx.stroke();
+        
+        // Towers
+        towers.forEach(t => {
+            if (t.isDestroyed) return;
+            minimapCtx.fillStyle = t.team === 'player' ? '#22c55e' : '#ef4444';
+            minimapCtx.beginPath();
+            minimapCtx.arc(t.x * scaleX, t.y * scaleY, 5, 0, Math.PI * 2);
+            minimapCtx.fill();
+        });
+        
+        // Minions
+        minions.forEach(m => {
+            if (m.isDead) return;
+            minimapCtx.fillStyle = m.team === 'player' ? '#22c55e' : '#ef4444';
+            minimapCtx.beginPath();
+            minimapCtx.arc(m.x * scaleX, m.y * scaleY, 2, 0, Math.PI * 2);
+            minimapCtx.fill();
+        });
+        
+        // Heroes
+        playerTeam.forEach(h => {
+            if (h.isDead) return;
+            minimapCtx.fillStyle = '#22c55e';
+            minimapCtx.beginPath();
+            minimapCtx.arc(h.x * scaleX, h.y * scaleY, 4, 0, Math.PI * 2);
+            minimapCtx.fill();
+        });
+        
+        enemyTeam.forEach(h => {
+            if (h.isDead) return;
+            minimapCtx.fillStyle = '#ef4444';
+            minimapCtx.beginPath();
+            minimapCtx.arc(h.x * scaleX, h.y * scaleY, 4, 0, Math.PI * 2);
+            minimapCtx.fill();
+        });
+        
+        // Camera view
+        minimapCtx.strokeStyle = '#fff';
+        minimapCtx.lineWidth = 1;
+        minimapCtx.strokeRect(
+            camera.x * scaleX,
+            camera.y * scaleY,
+            CANVAS_WIDTH * scaleX,
+            CANVAS_HEIGHT * scaleY
+        );
+    }
+    
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+    }
+    
+    function addKillFeed(killer, victim) {
+        const feed = document.getElementById('killFeed');
+        const entry = document.createElement('div');
+        entry.className = 'kill-entry';
+        entry.innerHTML = `<span style="color: ${killer.team === 'player' ? '#22c55e' : '#ef4444'}">${killer.name || killer.icon || '⚔️'}</span> killed <span style="color: ${victim.team === 'player' ? '#22c55e' : '#ef4444'}">${victim.name || victim.icon || '⚔️'}</span>`;
+        feed.appendChild(entry);
+        
+        // Remove after 5 seconds
+        setTimeout(() => entry.remove(), 5000);
+        
+        // Keep only last 5 entries
+        while (feed.children.length > 5) {
+            feed.removeChild(feed.firstChild);
+        }
+    }
+    
+    function checkWinCondition() {
+        // Count remaining enemy towers
+        const enemyTowers = towers.filter(t => t.team === 'enemy' && !t.isDestroyed);
+        const playerTowers = towers.filter(t => t.team === 'player' && !t.isDestroyed);
+        
+        if (enemyTowers.length === 0) {
+            endGame(true);
+        } else if (playerTowers.length === 0) {
+            endGame(false);
+        }
+    }
+    
+    function endGame(victory) {
+        gameState = 'gameover';
+        
+        const gameOverScreen = document.getElementById('gameOver');
+        gameOverScreen.classList.add('visible');
+        gameOverScreen.classList.remove('victory', 'defeat');
+        gameOverScreen.classList.add(victory ? 'victory' : 'defeat');
+        
+        document.getElementById('gameOverTitle').textContent = victory ? 'VICTORY!' : 'DEFEAT';
+        document.getElementById('gameOverStats').textContent = 
+            `Kills: ${player?.kills || 0} | Gold: ${Math.round(player?.gold || 0)} | Level: ${player?.level || 1}`;
+    }
+    
+    // ============================================
+    // INPUT HANDLING
+    // ============================================
+    
+    document.addEventListener('keydown', e => {
+        keys[e.key.toLowerCase()] = true;
+        
+        if (gameState === 'playing' && player && !player.isDead) {
+            // Skill inputs
+            if (e.key.toLowerCase() === 'q') player.useSkill(0);
+            if (e.key.toLowerCase() === 'e') player.useSkill(1);
+            if (e.key.toLowerCase() === 'r') player.useUltimate();
+            
+            // Release target
+            if (e.key.toLowerCase() === 't') player.target = null;
+        }
+    });
+    
+    document.addEventListener('keyup', e => {
+        keys[e.key.toLowerCase()] = false;
+    });
+    
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mousePos.x = e.clientX - rect.left;
+        mousePos.y = e.clientY - rect.top;
+        
+        // Convert to world coordinates
+        mouseWorldPos.x = mousePos.x;
+        mouseWorldPos.y = mousePos.y;
+    });
+    
+    canvas.addEventListener('click', e => {
+        if (gameState !== 'playing' || !player || player.isDead) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Find clicked entity
+        const allEntities = [...playerTeam, ...enemyTeam, ...minions];
+        let clickedEntity = null;
+        let minDist = 30;
+        
+        allEntities.forEach(e => {
+            if (e.isDead) return;
+            const dist = Math.sqrt((x - e.x) ** 2 + (y - e.y) ** 2);
+            if (dist < minDist) {
+                minDist = dist;
+                clickedEntity = e;
+            }
+        });
+        
+        if (clickedEntity && clickedEntity.team !== 'player') {
+            // Lock target
+            player.target = clickedEntity;
+            
+            // Attack if in range
+            if (player.distanceTo(clickedEntity) <= player.attackRange) {
+                player.attackTarget(clickedEntity);
+            }
+        } else {
+            // Move to location (optional)
+            player.target = null;
+        }
+    });
+    
+    // Hero selection
+    document.querySelectorAll('.hero-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.hero-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedHero = card.dataset.hero;
+        });
+    });
+    
+    // Start button
+    document.getElementById('startBtn').addEventListener('click', () => {
+        initGame();
+        requestAnimationFrame(gameLoop);
+    });
+    
+    // ============================================
+    // GAME LOOP
+    // ============================================
+    
+    function gameLoop(timestamp) {
+        const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
+        lastTime = timestamp;
+        
+        update(dt);
+        draw();
+        
+        if (gameState === 'playing') {
+            requestAnimationFrame(gameLoop);
+        }
+    }
+    
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
+    // Initial draw
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
+    ctx.fillStyle = '#fff';
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('NEXUS ARENA', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+    ctx.font = '16px sans-serif';
+    ctx.fillText('Select a hero and click START', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 40);
+    
+    </script>
+</body>
+</html>
