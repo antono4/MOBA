@@ -4,861 +4,1850 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS ARENA - 5v5 MOBA</title>
+    <meta name="description" content="NEXUS ARENA - Game MOBA 5v5 playable langsung di browser!">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
-            --accent: #06b6d4;
-            --dark: #0f172a;
-            --darker: #020617;
-            --light: #f1f5f9;
-            --text: #e2e8f0;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--darker);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Animated Background */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: #0a0a0f;
+            color: #fff;
             overflow: hidden;
+            user-select: none;
         }
-
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
-            animation: pulse 15s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-        }
-
-        /* Grid Pattern */
-        .grid-pattern {
+        
+        /* Start Screen */
+        #startScreen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-            position: relative;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: width 0.3s;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
+            inset: 0;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a0f2e 50%, #0f1a2e 100%);
             display: flex;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 6rem 2rem 4rem;
+            z-index: 1000;
+            transition: opacity 0.5s;
         }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 50px;
-            font-size: 0.875rem;
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .hero-badge span {
-            width: 8px;
-            height: 8px;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .hero h1 {
-            font-size: clamp(3rem, 8vw, 5rem);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            animation: fadeInUp 0.6s ease-out 0.1s both;
-        }
-
-        .hero h1 span {
-            background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
+        
+        #startScreen.hidden { opacity: 0; pointer-events: none; }
+        
+        .game-logo {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #6366f1, #ec4899, #06b6d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 50px rgba(99, 102, 241, 0.5);
         }
-
-        .hero p {
-            font-size: 1.25rem;
+        
+        .game-subtitle {
+            font-size: 1.5rem;
             color: #94a3b8;
-            max-width: 600px;
-            margin-bottom: 2.5rem;
-            animation: fadeInUp 0.6s ease-out 0.2s both;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            animation: fadeInUp 0.6s ease-out 0.3s both;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--primary);
-        }
-
-        /* Game Container */
-        .game-container {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 16px;
-            padding: 1rem;
-            margin: 2rem auto;
-            max-width: 1200px;
-            animation: fadeInUp 0.6s ease-out 0.4s both;
-        }
-
-        #game-canvas {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: var(--dark);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #game-canvas.loading {
-            background: linear-gradient(135deg, var(--dark), var(--darker));
-        }
-
-        .loading-content {
-            text-align: center;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(99, 102, 241, 0.2);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: #94a3b8;
-            font-size: 0.875rem;
-        }
-
-        /* Stats Section */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 4rem 2rem;
-            animation: fadeInUp 0.6s ease-out 0.5s both;
-        }
-
-        .stat-card {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(99, 102, 241, 0.1);
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-label {
-            color: #94a3b8;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-
-        /* Features Section */
-        .features {
-            padding: 4rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
             margin-bottom: 3rem;
         }
-
-        .section-title h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .section-title p {
-            color: #94a3b8;
+        
+        .hero-select {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
             max-width: 600px;
+        }
+        
+        .hero-card {
+            width: 120px;
+            padding: 1rem;
+            background: rgba(30, 30, 50, 0.8);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .hero-card:hover { border-color: #6366f1; transform: scale(1.05); }
+        .hero-card.selected { border-color: #ec4899; background: rgba(236, 72, 153, 0.2); }
+        
+        .hero-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .hero-name { font-weight: 600; font-size: 0.9rem; }
+        .hero-role { font-size: 0.75rem; color: #94a3b8; }
+        
+        .start-btn {
+            padding: 1rem 3rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+        
+        /* Game UI */
+        #gameCanvas {
+            display: block;
             margin: 0 auto;
         }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        
+        #gameUI {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
             gap: 2rem;
+            z-index: 100;
         }
-
-        .feature-card {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(99, 102, 241, 0.1);
-            border-radius: 16px;
-            padding: 2rem;
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .feature-card p {
-            color: #94a3b8;
-            font-size: 0.875rem;
-            line-height: 1.6;
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 2rem;
-            border-top: 1px solid rgba(99, 102, 241, 0.1);
-            color: #64748b;
-        }
-
-        footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            nav {
-                padding: 1rem;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .hero {
-                padding: 5rem 1rem 3rem;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .stats {
-                margin: 2rem 1rem;
-            }
-
-            .features {
-                padding: 2rem 1rem;
-            }
-        }
-
-        /* Scroll to top button */
-        .scroll-top {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.3);
-        }
-
-        .scroll-top.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .scroll-top:hover {
-            transform: translateY(-5px);
-        }
-
-        /* Notification Badge */
-        .notification-badge {
-            position: fixed;
-            top: 100px;
-            right: 2rem;
+        
+        #gameUI.visible { display: flex; }
+        
+        .ui-panel {
             background: rgba(15, 23, 42, 0.95);
             border: 1px solid rgba(99, 102, 241, 0.3);
             border-radius: 12px;
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .hp-bar {
+            width: 200px;
+            height: 20px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            transition: width 0.3s;
+        }
+        
+        .hp-text {
+            position: absolute;
+            inset: 0;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            transform: translateX(150%);
-            transition: transform 0.5s ease;
-        }
-
-        .notification-badge.show {
-            transform: translateX(0);
-        }
-
-        .notification-badge .icon {
-            font-size: 1.5rem;
-        }
-
-        .notification-badge .content {
-            flex: 1;
-        }
-
-        .notification-badge .title {
+            justify-content: center;
+            font-size: 0.75rem;
             font-weight: 600;
+        }
+        
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
             font-size: 0.875rem;
         }
-
-        .notification-badge .message {
-            font-size: 0.75rem;
-            color: #94a3b8;
+        
+        .stat-icon { font-size: 1rem; }
+        .stat-value { font-weight: 600; color: #fbbf24; }
+        
+        /* Minimap */
+        #minimap {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            z-index: 100;
         }
-
-        .notification-badge .close {
-            background: none;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-            font-size: 1.25rem;
-            padding: 0.25rem;
+        
+        #minimap.visible { display: block; }
+        
+        #minimapCanvas {
+            width: 100%;
+            height: 100%;
         }
-
-        .notification-badge .close:hover {
-            color: white;
+        
+        /* Controls Info */
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.8rem;
+            display: none;
+            z-index: 100;
         }
+        
+        #controls.visible { display: block; }
+        
+        #controls h4 { color: #6366f1; margin-bottom: 0.5rem; }
+        #controls p { color: #94a3b8; margin: 0.25rem 0; }
+        #controls span { color: #fff; font-weight: 600; }
+        
+        /* Game Over Screen */
+        #gameOver {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        #gameOver.visible { display: flex; }
+        
+        #gameOver h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        #gameOver.victory h1 { color: #22c55e; }
+        #gameOver.defeat h1 { color: #ef4444; }
+        
+        #gameOver p { color: #94a3b8; margin-bottom: 2rem; }
+        
+        /* Scoreboard */
+        #scoreboard {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            display: none;
+            z-index: 100;
+            min-width: 150px;
+        }
+        
+        #scoreboard.visible { display: block; }
+        
+        .score-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin: 0.25rem 0;
+        }
+        
+        .score-team.player { background: rgba(34, 197, 94, 0.2); }
+        .score-team.enemy { background: rgba(239, 68, 68, 0.2); }
+        
+        .score-label { font-weight: 600; }
+        .score-value { font-size: 1.5rem; font-weight: 700; }
+        
+        .player .score-value { color: #22c55e; }
+        .enemy .score-value { color: #ef4444; }
+        
+        /* Kill Feed */
+        #killFeed {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            z-index: 100;
+            display: none;
+        }
+        
+        #killFeed.visible { display: block; }
+        
+        .kill-entry {
+            background: rgba(15, 23, 42, 0.9);
+            border-left: 3px solid #ef4444;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .kill-entry.assist { border-left-color: #6366f1; }
     </style>
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation"></div>
-    <div class="grid-pattern"></div>
-
-    <!-- Navigation -->
-    <nav>
-        <div class="logo">
-            <div class="logo-icon">⚔️</div>
-            NEXUS ARENA
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <div class="game-logo">⚔️ NEXUS ARENA</div>
+        <div class="game-subtitle">5v5 Multiplayer Online Battle Arena</div>
+        
+        <div class="hero-select">
+            <div class="hero-card selected" data-hero="mage">
+                <div class="hero-icon">🔮</div>
+                <div class="hero-name">Kael</div>
+                <div class="hero-role">Mage</div>
+            </div>
+            <div class="hero-card" data-hero="assassin">
+                <div class="hero-icon">🗡️</div>
+                <div class="hero-name">Raven</div>
+                <div class="hero-role">Assassin</div>
+            </div>
+            <div class="hero-card" data-hero="tank">
+                <div class="hero-icon">🛡️</div>
+                <div class="hero-name">Titan</div>
+                <div class="hero-role">Tank</div>
+            </div>
+            <div class="hero-card" data-hero="marksman">
+                <div class="hero-icon">🏹</div>
+                <div class="hero-name">Viper</div>
+                <div class="hero-role">Marksman</div>
+            </div>
         </div>
-        <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#game">Play</a></li>
-            <li><a href="#about">About</a></li>
-        </ul>
-    </nav>
-
-    <!-- Notification Badge -->
-    <div class="notification-badge" id="notification">
-        <span class="icon">🎮</span>
-        <div class="content">
-            <div class="title">Game Ready!</div>
-            <div class="message">Unity WebGL loaded successfully</div>
+        
+        <button class="start-btn" id="startBtn">🎮 START BATTLE</button>
+    </div>
+    
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- Game UI -->
+    <div id="gameUI">
+        <div class="ui-panel">
+            <div class="hp-bar">
+                <div class="hp-fill" id="playerHpFill"></div>
+                <div class="hp-text" id="playerHpText">100 / 100</div>
+            </div>
+            <div class="stat-row">
+                <span class="stat-icon">⚔️</span>
+                <span class="stat-value" id="playerLevel">LV 1</span>
+                <span class="stat-icon">💰</span>
+                <span class="stat-value" id="playerGold">0</span>
+                <span class="stat-icon">⚡</span>
+                <span class="stat-value" id="playerKills">0</span>
+            </div>
         </div>
-        <button class="close" onclick="hideNotification()">×</button>
+    </div>
+    
+    <!-- Minimap -->
+    <div id="minimap">
+        <canvas id="minimapCanvas"></canvas>
+    </div>
+    
+    <!-- Controls Info -->
+    <div id="controls">
+        <h4>🎮 Controls</h4>
+        <p><span>WASD</span> - Move</p>
+        <p><span>Left Click</span> - Attack / Lock Target</p>
+        <p><span>Q</span> - Skill 1</p>
+        <p><span>E</span> - Skill 2</p>
+        <p><span>R</span> - Ultimate</p>
+        <p><span>T</span> - Release Target</p>
+        <p><span>Space</span> - Attack Nearest</p>
+    </div>
+    
+    <!-- Scoreboard -->
+    <div id="scoreboard">
+        <div class="score-team player">
+            <span class="score-label">🟢 Your Team</span>
+            <span class="score-value" id="playerScore">0</span>
+        </div>
+        <div class="score-team enemy">
+            <span class="score-label">🔴 Enemy</span>
+            <span class="score-value" id="enemyScore">0</span>
+        </div>
+    </div>
+    
+    <!-- Kill Feed -->
+    <div id="killFeed"></div>
+    
+    <!-- Game Over Screen -->
+    <div id="gameOver">
+        <h1 id="gameOverTitle">VICTORY</h1>
+        <p id="gameOverStats">You destroyed 5 towers!</p>
+        <button class="start-btn" onclick="location.reload()">🔄 Play Again</button>
     </div>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="hero-badge">
-            <span></span>
-            Now in Early Access
-        </div>
-        <h1>BATTLE IN THE<br><span>NEXUS ARENA</span></h1>
-        <p>5v5 Multiplayer Online Battle Arena dengan gameplay strategis dan aksi cepat. Pilih hero, kuasai map, dan jadilah legend!</p>
-        <div class="hero-buttons">
-            <a href="#game" class="btn btn-primary">
-                🎮 Play Now
-            </a>
-            <a href="#features" class="btn btn-secondary">
-                📖 Learn More
-            </a>
-        </div>
-    </section>
-
-    <!-- Game Container -->
-    <section class="game-container" id="game">
-        <div id="game-canvas" class="loading">
-            <div class="loading-content">
-                <div class="loading-spinner"></div>
-                <div class="loading-text">Loading NEXUS ARENA...</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="stat-card">
-            <div class="stat-icon">🎯</div>
-            <div class="stat-number">50+</div>
-            <div class="stat-label">Heroes Available</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">🗺️</div>
-            <div class="stat-number">3</div>
-            <div class="stat-label">Unique Maps</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">⚡</div>
-            <div class="stat-number">60</div>
-            <div class="stat-label">FPS Target</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">🌍</div>
-            <div class="stat-number">10+</div>
-            <div class="stat-label">Server Regions</div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features" id="features">
-        <div class="section-title">
-            <h2>Game Features</h2>
-            <p>Berbagai fitur canggih untuk pengalaman MOBA terbaik</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3>Smart Target Lock</h3>
-                <p>Sistem penguncian target otomatis dengan prioritas HP terendah. Visual indicator real-time untuk gameplay yang lebih responsif.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚔️</div>
-                <h3>6 Role Classes</h3>
-                <p>Berbagai pilihan role: Tank, Fighter, Assassin, Mage, Marksman, dan Support. Setiap role memiliki skill unique.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🗺️</div>
-                <h3>3-Lane Map</h3>
-                <p>Map dengan Top, Mid, dan Bottom lane. Jungle area dengan buff monsters dan 2 epic boss: Kurala Wyrm dan Void Sentinel.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🌐</div>
-                <h3>Low Latency Netcode</h3>
-                <p>Server authoritative dengan rollback netcode untuk pengalaman multiplayer yang adil dan minim lag.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">💰</div>
-                <h3>Balanced Economy</h3>
-                <p>Sistem gold dan EXP yang transparan. Item progression yang meaningful dengan comeback mechanics.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3>Kurala Cyberpunk Theme</h3>
-                <p>Visual theme unik yang menggabungkan cyberpunk dengan mitologi Nusantara. Aesthetic yang memukau!</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="features" id="about">
-        <div class="section-title">
-            <h2>About the Game</h2>
-            <p>Game MOBA 5v5 yang dikembangkan dengan Unity dan C#</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🔧</div>
-                <h3>Built with Unity</h3>
-                <p>Dikembangkan menggunakan Unity game engine untuk compatibility lintas platform (PC, Mobile, Web).</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📝</div>
-                <h3>C# Scripts</h3>
-                <p>Clean, well-documented code dengan sistem modular. Target Lock-on System, Enemy Health, dan Basic Attack Controller.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📚</div>
-                <h3>Documentation</h3>
-                <p>Game Design Document (GDD) lengkap mencakup konsep, map design, network architecture, dan skill kit hero.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p>© 2026 NEXUS ARENA. Built with ❤️ using Unity & OpenHands AI.</p>
-        <p style="margin-top: 0.5rem;">
-            <a href="https://github.com/antono4/MOBA">View on GitHub</a> · 
-            <a href="./Scripts/MOBA/README_TargetLockSystem.md">Documentation</a> · 
-            <a href="./GDD-MOBA-5v5.md">Game Design Document</a>
-        </p>
-    </footer>
-
-    <!-- Scroll to Top Button -->
-    <button class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</button>
-
-    <!-- JavaScript -->
     <script>
-        // Unity WebGL Loader Configuration
-        const UNITY_BUILD_PATH = './Build'; // Path ke Unity WebGL build
+    // ============================================
+    // NEXUS ARENA - Complete MOBA Game
+    // ============================================
+    
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const minimapCanvas = document.getElementById('minimapCanvas');
+    const minimapCtx = minimapCanvas.getContext('2d');
+    
+    // Game Constants
+    const TILE_SIZE = 40;
+    const MAP_WIDTH = 40;
+    const MAP_HEIGHT = 30;
+    const CANVAS_WIDTH = MAP_WIDTH * TILE_SIZE;
+    const CANVAS_HEIGHT = MAP_HEIGHT * TILE_SIZE;
+    
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    minimapCanvas.width = 200;
+    minimapCanvas.height = 150;
+    
+    // Game State
+    let gameState = 'menu';
+    let selectedHero = 'mage';
+    let camera = { x: 0, y: 0 };
+    let lastTime = 0;
+    let gameTime = 0;
+    
+    // Teams
+    let playerTeam = [];
+    let enemyTeam = [];
+    let player = null;
+    let projectiles = [];
+    let particles = [];
+    let damageNumbers = [];
+    
+    // Map elements
+    let towers = [];
+    let minions = [];
+    let jungleCamps = [];
+    let nexus = [];
+    
+    // Input
+    let keys = {};
+    let mousePos = { x: 0, y: 0 };
+    let mouseWorldPos = { x: 0, y: 0 };
+    
+    // ============================================
+    // HERO DEFINITIONS
+    // ============================================
+    
+    const HEROES = {
+        mage: {
+            name: 'Kael',
+            icon: '🔮',
+            color: '#8b5cf6',
+            maxHp: 550,
+            mana: 400,
+            attack: 65,
+            attackRange: 200,
+            moveSpeed: 3.5,
+            skills: [
+                { name: 'Void Bolt', damage: 200, cooldown: 5, mana: 60, range: 300, type: 'skillshot' },
+                { name: 'Phase Shift', damage: 150, cooldown: 8, mana: 80, type: 'dash', shield: 100 },
+                { name: 'Void Storm', damage: 80, cooldown: 12, mana: 120, type: 'aoe', duration: 4 }
+            ],
+            ultimate: { name: 'Sentinel Judgment', damage: 600, cooldown: 100, mana: 200, type: 'global' }
+        },
+        assassin: {
+            name: 'Raven',
+            icon: '🗡️',
+            color: '#dc2626',
+            maxHp: 500,
+            mana: 250,
+            attack: 85,
+            attackRange: 120,
+            moveSpeed: 4.5,
+            skills: [
+                { name: 'Shadow Strike', damage: 280, cooldown: 6, mana: 50, range: 250, type: 'dash' },
+                { name: 'Smoke Bomb', damage: 0, cooldown: 15, mana: 60, type: 'aoe', stealth: 3 },
+                { name: 'Backstab', damage: 350, cooldown: 8, mana: 70, range: 100, type: 'melee' }
+            ],
+            ultimate: { name: 'Death Mark', damage: 800, cooldown: 90, mana: 150, type: 'execute' }
+        },
+        tank: {
+            name: 'Titan',
+            icon: '🛡️',
+            color: '#0891b2',
+            maxHp: 900,
+            mana: 300,
+            attack: 55,
+            attackRange: 100,
+            moveSpeed: 3,
+            skills: [
+                { name: 'Shield Bash', damage: 150, cooldown: 6, mana: 50, range: 150, type: 'stun' },
+                { name: 'Fortify', damage: 0, cooldown: 14, mana: 80, type: 'buff', armor: 50 },
+                { name: 'Ground Slam', damage: 200, cooldown: 10, mana: 100, range: 200, type: 'aoe' }
+            ],
+            ultimate: { name: 'Unstoppable', damage: 400, cooldown: 80, mana: 180, type: 'aoe', cc: 2 }
+        },
+        marksman: {
+            name: 'Viper',
+            icon: '🏹',
+            color: '#22c55e',
+            maxHp: 480,
+            mana: 280,
+            attack: 75,
+            attackRange: 280,
+            moveSpeed: 3.2,
+            skills: [
+                { name: 'Piercing Arrow', damage: 250, cooldown: 7, mana: 70, range: 400, type: 'skillshot' },
+                { name: 'Escape', damage: 100, cooldown: 10, mana: 60, type: 'dash' },
+                { name: 'Multi-shot', damage: 150, cooldown: 12, mana: 100, range: 300, type: 'cone' }
+            ],
+            ultimate: { name: 'Rain of Arrows', damage: 500, cooldown: 100, mana: 200, type: 'global' }
+        }
+    };
+    
+    // ============================================
+    // CLASSES
+    // ============================================
+    
+    class Entity {
+        constructor(x, y, team) {
+            this.x = x;
+            this.y = y;
+            this.team = team;
+            this.width = 30;
+            this.height = 30;
+            this.currentHp = 100;
+            this.maxHp = 100;
+            this.attack = 20;
+            this.attackRange = 100;
+            this.attackCooldown = 0;
+            this.attackSpeed = 1;
+            this.moveSpeed = 3;
+            this.level = 1;
+            this.gold = 0;
+            this.exp = 0;
+            this.isDead = false;
+            this.target = null;
+            this.isSelected = false;
+            this.radius = 15;
+        }
         
-        // Initialize Unity WebGL when page loads
-        window.addEventListener('load', function() {
-            // Check if Unity build files exist
-            fetch(UNITY_BUILD_PATH + '/Build.loader.js')
-                .then(response => {
-                    if (response.ok) {
-                        loadUnityGame();
-                    } else {
-                        showDemoMode();
-                    }
-                })
-                .catch(() => {
-                    showDemoMode();
+        update(dt) {
+            if (this.isDead) return;
+            
+            if (this.attackCooldown > 0) this.attackCooldown -= dt;
+            
+            if (this.currentHp < this.maxHp) {
+                this.currentHp += 2 * dt;
+                this.currentHp = Math.min(this.currentHp, this.maxHp);
+            }
+            
+            this.aiUpdate(dt);
+        }
+        
+        aiUpdate(dt) {}
+        
+        takeDamage(amount, source) {
+            if (this.isDead) return;
+            
+            this.currentHp -= amount;
+            
+            damageNumbers.push({
+                x: this.x,
+                y: this.y - 20,
+                value: Math.round(amount),
+                life: 1,
+                color: source.team === 'player' ? '#ef4444' : '#22c55e'
+            });
+            
+            for (let i = 0; i < 5; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 100,
+                    vy: (Math.random() - 0.5) * 100,
+                    life: 0.3,
+                    color: '#ef4444',
+                    size: 4
                 });
-        });
-
-        // Function to load Unity WebGL game
-        function loadUnityGame() {
-            const gameCanvas = document.getElementById('game-canvas');
+            }
             
-            // Clear loading content
-            gameCanvas.innerHTML = '';
-            gameCanvas.classList.remove('loading');
+            if (this.currentHp <= 0) {
+                this.die(source);
+            }
+        }
+        
+        die(killer) {
+            this.isDead = true;
             
-            // Unity WebGL loader script
-            const loaderScript = document.createElement('script');
-            loaderScript.src = UNITY_BUILD_PATH + '/Build.loader.js';
-            loaderScript.onload = () => {
-                createUnityInstance(
-                    document.querySelector("#game-canvas"),
-                    UNITY_BUILD_PATH + '/Build.json',
-                    (progress) => {
-                        // Loading progress
-                        const loadingText = gameCanvas.querySelector('.loading-text') || 
-                            gameCanvas.appendChild(Object.assign(document.createElement('div'), {
-                                className: 'loading-text',
-                                textContent: 'Loading... 0%'
-                            }));
-                        loadingText.textContent = `Loading... ${Math.round(progress * 100)}%`;
-                    }
-                ).then((unityInstance) => {
-                    // Game loaded successfully
-                    showNotification('Game Ready!', 'NEXUS ARENA loaded successfully');
-                }).catch((error) => {
-                    console.error('Unity load error:', error);
-                    showDemoMode();
+            if (killer) {
+                killer.gold += 300;
+                killer.exp += 200;
+                killer.kills = (killer.kills || 0) + 1;
+                addKillFeed(killer, this);
+                killer.checkLevelUp();
+            }
+            
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 200,
+                    vy: (Math.random() - 0.5) * 200,
+                    life: 1,
+                    color: this.team === 'player' ? '#22c55e' : '#ef4444',
+                    size: 6
                 });
-            };
-            loaderScript.onerror = showDemoMode;
-            document.body.appendChild(loaderScript);
-        }
-
-        // Show demo/placeholder mode
-        function showDemoMode() {
-            const gameCanvas = document.getElementById('game-canvas');
-            gameCanvas.innerHTML = `
-                <div style="text-align: center; padding: 2rem;">
-                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎮</div>
-                    <h2 style="margin-bottom: 1rem;">NEXUS ARENA</h2>
-                    <p style="color: #94a3b8; margin-bottom: 1.5rem;">
-                        Unity WebGL Build belum tersedia.<br>
-                        Build game terlebih dahulu untuk memainkan di browser.
-                    </p>
-                    <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); 
-                                border-radius: 8px; padding: 1rem; display: inline-block;">
-                        <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
-                            Steps to build:
-                        </p>
-                        <ol style="text-align: left; font-size: 0.875rem; color: #64748b; padding-left: 1.5rem;">
-                            <li>Open project in Unity Editor</li>
-                            <li>Go to File → Build Settings</li>
-                            <li>Select WebGL platform</li>
-                            <li>Click Build & Run</li>
-                            <li>Copy Build folder ke directory ini</li>
-                        </ol>
-                    </div>
-                </div>
-            `;
-            gameCanvas.classList.remove('loading');
-        }
-
-        // Show notification
-        function showNotification(title, message) {
-            const notification = document.getElementById('notification');
-            notification.querySelector('.title').textContent = title;
-            notification.querySelector('.message').textContent = message;
-            notification.classList.add('show');
+            }
             
-            // Auto hide after 5 seconds
-            setTimeout(hideNotification, 5000);
+            setTimeout(() => this.respawn(), 10);
         }
-
-        function hideNotification() {
-            document.getElementById('notification').classList.remove('show');
+        
+        respawn() {
+            this.isDead = false;
+            this.currentHp = this.maxHp;
+            this.x = this.team === 'player' ? 200 : CANVAS_WIDTH - 200;
+            this.y = CANVAS_HEIGHT / 2;
         }
-
-        // Scroll to top
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        checkLevelUp() {
+            const expNeeded = this.level * 300;
+            while (this.exp >= expNeeded && this.level < 15) {
+                this.exp -= expNeeded;
+                this.level++;
+                this.maxHp += 85;
+                this.currentHp = this.maxHp;
+                this.attack += 5;
+                this.attackRange += 5;
+                
+                for (let i = 0; i < 30; i++) {
+                    particles.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: (Math.random() - 0.5) * 150,
+                        vy: (Math.random() - 0.5) * 150 - 100,
+                        life: 1,
+                        color: '#fbbf24',
+                        size: 5
+                    });
+                }
+            }
         }
-
-        // Show/hide scroll to top button
-        window.addEventListener('scroll', () => {
-            const scrollTop = document.getElementById('scrollTop');
-            if (window.scrollY > 500) {
-                scrollTop.classList.add('visible');
+        
+        attackTarget(target) {
+            if (this.attackCooldown > 0 || !target || target.isDead) return;
+            
+            const dist = this.distanceTo(target);
+            if (dist <= this.attackRange) {
+                target.takeDamage(this.attack, this);
+                this.attackCooldown = 1 / this.attackSpeed;
+                this.isSelected = true;
+                setTimeout(() => this.isSelected = false, 100);
+            }
+        }
+        
+        distanceTo(other) {
+            return Math.sqrt((this.x - other.x) ** 2 + (this.y - other.y) ** 2);
+        }
+        
+        draw() {
+            if (this.isDead) return;
+            
+            ctx.save();
+            
+            if (this.isSelected) {
+                ctx.shadowColor = this.color || '#fff';
+                ctx.shadowBlur = 20;
+            }
+            
+            ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = this.color || '#fff';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.icon || '⚔️', this.x, this.y);
+            
+            ctx.restore();
+            
+            this.drawHpBar();
+        }
+        
+        drawHpBar() {
+            const barWidth = 40;
+            const barHeight = 4;
+            const x = this.x - barWidth / 2;
+            const y = this.y - this.radius - 10;
+            
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(x, y, barWidth, barHeight);
+            
+            const hpPercent = this.currentHp / this.maxHp;
+            ctx.fillStyle = hpPercent > 0.5 ? '#22c55e' : hpPercent > 0.25 ? '#fbbf24' : '#ef4444';
+            ctx.fillRect(x, y, barWidth * hpPercent, barHeight);
+            
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, barWidth, barHeight);
+        }
+    }
+    
+    class Hero extends Entity {
+        constructor(x, y, team, heroType) {
+            super(x, y, team);
+            const heroData = HEROES[heroType];
+            Object.assign(this, heroData);
+            this.heroType = heroType;
+            this.maxHp = heroData.maxHp;
+            this.currentHp = this.maxHp;
+            this.mana = heroData.mana;
+            this.maxMana = heroData.mana;
+            this.attack = heroData.attack;
+            this.attackRange = heroData.attackRange;
+            this.moveSpeed = heroData.moveSpeed;
+            this.attackSpeed = 1;
+            this.kills = 0;
+            this.assists = 0;
+            
+            this.skillCooldowns = [0, 0, 0];
+            this.ultimateCooldown = 0;
+            this.isChanneling = false;
+            this.channelTime = 0;
+        }
+        
+        update(dt) {
+            if (this.isDead) return;
+            
+            super.update(dt);
+            
+            for (let i = 0; i < this.skillCooldowns.length; i++) {
+                if (this.skillCooldowns[i] > 0) this.skillCooldowns[i] -= dt;
+            }
+            if (this.ultimateCooldown > 0) this.ultimateCooldown -= dt;
+            
+            if (this.mana < this.maxMana) {
+                this.mana += 5 * dt;
+                this.mana = Math.min(this.mana, this.maxMana);
+            }
+            
+            if (this.isChanneling) {
+                this.channelTime -= dt;
+                if (this.channelTime <= 0) {
+                    this.isChanneling = false;
+                }
+            }
+        }
+        
+        useSkill(index) {
+            if (this.isDead || this.isChanneling) return;
+            
+            const skill = this.skills[index];
+            if (!skill || this.skillCooldowns[index] > 0 || this.mana < skill.mana) return;
+            
+            this.mana -= skill.mana;
+            this.skillCooldowns[index] = skill.cooldown;
+            
+            this.executeSkill(skill, index);
+        }
+        
+        executeSkill(skill, index) {
+            const targetPos = this.target ? { x: this.target.x, y: this.target.y } : { x: this.x, y: this.y + 100 };
+            
+            switch (skill.type) {
+                case 'skillshot':
+                    const angle = Math.atan2(targetPos.y - this.y, targetPos.x - this.x);
+                    projectiles.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: Math.cos(angle) * 400,
+                        vy: Math.sin(angle) * 400,
+                        damage: skill.damage,
+                        radius: 15,
+                        owner: this,
+                        color: this.color,
+                        pierce: false,
+                        life: 2
+                    });
+                    break;
+                    
+                case 'dash':
+                    const dashDist = 150;
+                    const dx = targetPos.x - this.x;
+                    const dy = targetPos.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    this.x += (dx / dist) * dashDist;
+                    this.y += (dy / dist) * dashDist;
+                    
+                    this.findEnemiesInRange(100).forEach(enemy => {
+                        if (enemy.team !== this.team) {
+                            enemy.takeDamage(skill.damage, this);
+                        }
+                    });
+                    
+                    if (skill.shield) {
+                        this.currentHp = Math.min(this.currentHp + skill.shield, this.maxHp);
+                    }
+                    break;
+                    
+                case 'aoe':
+                    const aoeRadius = 150;
+                    this.findEnemiesInRange(aoeRadius).forEach(enemy => {
+                        if (enemy.team !== this.team) {
+                            enemy.takeDamage(skill.damage, this);
+                        }
+                    });
+                    
+                    for (let i = 0; i < 20; i++) {
+                        particles.push({
+                            x: this.x,
+                            y: this.y,
+                            vx: (Math.random() - 0.5) * 200,
+                            vy: (Math.random() - 0.5) * 200,
+                            life: 0.8,
+                            color: this.color,
+                            size: 8
+                        });
+                    }
+                    break;
+                    
+                case 'buff':
+                    this.armor = (this.armor || 0) + (skill.armor || 0);
+                    setTimeout(() => this.armor -= (skill.armor || 0), 5000);
+                    break;
+            }
+            
+            for (let i = 0; i < 15; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 100,
+                    vy: (Math.random() - 0.5) * 100,
+                    life: 0.5,
+                    color: '#6366f1',
+                    size: 5
+                });
+            }
+        }
+        
+        useUltimate() {
+            if (this.isDead || this.ultimateCooldown > 0 || this.mana < this.ultimate.mana) return;
+            
+            this.mana -= this.ultimate.mana;
+            this.ultimateCooldown = this.ultimate.cooldown;
+            
+            const targetPos = this.target ? { x: this.target.x, y: this.target.y } : { x: this.x, y: this.y };
+            
+            switch (this.ultimate.type) {
+                case 'global':
+                    this.findEnemiesInRange(500).forEach(enemy => {
+                        if (enemy.team !== this.team) {
+                            enemy.takeDamage(this.ultimate.damage, this);
+                        }
+                    });
+                    break;
+                    
+                case 'execute':
+                    if (this.target && !this.target.isDead) {
+                        this.target.takeDamage(this.ultimate.damage, this);
+                        this.isChanneling = true;
+                        this.channelTime = 2;
+                    }
+                    break;
+                    
+                case 'aoe':
+                    this.findEnemiesInRange(300).forEach(enemy => {
+                        if (enemy.team !== this.team) {
+                            enemy.takeDamage(this.ultimate.damage, this);
+                            enemy.stunned = this.ultimate.cc || 0;
+                        }
+                    });
+                    break;
+            }
+            
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 300,
+                    vy: (Math.random() - 0.5) * 300,
+                    life: 1.5,
+                    color: '#fbbf24',
+                    size: 10
+                });
+            }
+        }
+        
+        findEnemiesInRange(range) {
+            const enemies = this.team === 'player' ? enemyTeam : playerTeam;
+            return enemies.filter(e => !e.isDead && this.distanceTo(e) <= range);
+        }
+        
+        draw() {
+            if (this.isDead) return;
+            
+            super.draw();
+            
+            this.drawSkills();
+            this.drawUltimate();
+            
+            if (this.target && !this.target.isDead) {
+                ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.target.x, this.target.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+        
+        drawSkills() {
+            const y = 20;
+            const spacing = 25;
+            
+            for (let i = 0; i < 3; i++) {
+                const x = CANVAS_WIDTH / 2 - spacing * 1.5 + i * spacing;
+                const skill = this.skills[i];
+                const cd = this.skillCooldowns[i];
+                const ready = cd <= 0 && this.mana >= skill.mana;
+                
+                ctx.fillStyle = ready ? '#1e293b' : '#0f172a';
+                ctx.fillRect(x - 10, CANVAS_HEIGHT - y - 20, 20, 20);
+                
+                if (cd > 0) {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    const cdHeight = (cd / skill.cooldown) * 20;
+                    ctx.fillRect(x - 10, CANVAS_HEIGHT - y - 20 + 20 - cdHeight, 20, cdHeight);
+                }
+                
+                ctx.strokeStyle = ready ? '#6366f1' : '#334155';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - 10, CANVAS_HEIGHT - y - 20, 20, 20);
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(['Q', 'E', 'R'][i], x, CANVAS_HEIGHT - y - 5);
+            }
+        }
+        
+        drawUltimate() {
+            const x = CANVAS_WIDTH / 2;
+            const y = 20;
+            const ready = this.ultimateCooldown <= 0 && this.mana >= this.ultimate.mana;
+            
+            ctx.fillStyle = ready ? '#1e293b' : '#0f172a';
+            ctx.fillRect(x - 15, CANVAS_HEIGHT - y - 25, 30, 25);
+            
+            if (this.ultimateCooldown > 0) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                const cdHeight = (this.ultimateCooldown / this.ultimate.cooldown) * 25;
+                ctx.fillRect(x - 15, CANVAS_HEIGHT - y - 25 + 25 - cdHeight, 30, cdHeight);
+            }
+            
+            ctx.strokeStyle = ready ? '#fbbf24' : '#334155';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x - 15, CANVAS_HEIGHT - y - 25, 30, 25);
+            
+            ctx.fillStyle = ready ? '#fbbf24' : '#fff';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('R', x, CANVAS_HEIGHT - y - 8);
+        }
+    }
+    
+    class Minion extends Entity {
+        constructor(x, y, team, type = 'melee') {
+            super(x, y, team);
+            this.type = type;
+            this.radius = 10;
+            this.maxHp = type === 'melee' ? 400 : type === 'ranged' ? 300 : 600;
+            this.currentHp = this.maxHp;
+            this.attack = type === 'siege' ? 80 : type === 'melee' ? 30 : 25;
+            this.attackRange = type === 'ranged' ? 150 : 50;
+            this.attackSpeed = 0.8;
+            this.moveSpeed = 2;
+            this.goldValue = type === 'siege' ? 90 : type === 'melee' ? 60 : 45;
+            this.expValue = type === 'siege' ? 100 : type === 'melee' ? 65 : 50;
+            
+            this.targetX = team === 'player' ? CANVAS_WIDTH - 100 : 100;
+            this.targetY = CANVAS_HEIGHT / 2;
+            this.lane = 'mid';
+        }
+        
+        aiUpdate(dt) {
+            if (this.isDead) return;
+            
+            let target = null;
+            let minDist = Infinity;
+            
+            const enemyMinions = this.team === 'player' ? enemyMinions : playerMinions;
+            enemyMinions.forEach(m => {
+                if (!m.isDead) {
+                    const dist = this.distanceTo(m);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = m;
+                    }
+                }
+            });
+            
+            towers.forEach(t => {
+                if (t.team !== this.team && !t.isDestroyed) {
+                    const dist = this.distanceTo(t);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = t;
+                    }
+                }
+            });
+            
+            const enemyHeroes = this.team === 'player' ? enemyTeam : playerTeam;
+            enemyHeroes.forEach(h => {
+                if (!h.isDead) {
+                    const dist = this.distanceTo(h);
+                    if (dist < minDist && dist < 300) {
+                        minDist = dist;
+                        target = h;
+                    }
+                }
+            });
+            
+            if (target && minDist <= this.attackRange) {
+                this.attackTarget(target);
             } else {
-                scrollTop.classList.remove('visible');
+                const dx = this.targetX - this.x;
+                const dy = this.targetY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 5) {
+                    this.x += (dx / dist) * this.moveSpeed;
+                    this.y += (dy / dist) * this.moveSpeed;
+                }
+            }
+            
+            this.updateTargetPosition();
+        }
+        
+        updateTargetPosition() {
+            if (this.team === 'player') {
+                this.targetX = Math.max(this.targetX - 0.5, 200);
+            } else {
+                this.targetX = Math.min(this.targetX + 0.5, CANVAS_WIDTH - 200);
+            }
+        }
+        
+        die(killer) {
+            super.die(killer);
+            
+            if (killer && killer.team === 'player') {
+                playerTeam.forEach(h => {
+                    if (!h.isDead) h.gold += this.goldValue / 5;
+                });
+            } else if (killer && killer.team === 'enemy') {
+                enemyTeam.forEach(h => {
+                    if (!h.isDead) h.gold += this.goldValue / 5;
+                });
+            }
+        }
+        
+        draw() {
+            if (this.isDead) return;
+            
+            ctx.save();
+            
+            ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const icons = { melee: '⚔️', ranged: '🏹', siege: '💣' };
+            ctx.fillText(icons[this.type] || '⚔️', this.x, this.y);
+            
+            ctx.restore();
+            
+            this.drawHpBar();
+        }
+    }
+    
+    class Tower extends Entity {
+        constructor(x, y, team, lane) {
+            super(x, y, team);
+            this.lane = lane;
+            this.radius = 30;
+            this.maxHp = 3000;
+            this.currentHp = this.maxHp;
+            this.attack = 150;
+            this.attackRange = 300;
+            this.attackSpeed = 0.5;
+            this.isDestroyed = false;
+            this.aggroRange = 350;
+            this.target = null;
+            
+            this.spawnX = x;
+            this.spawnY = y;
+        }
+        
+        update(dt) {
+            if (this.isDestroyed) return;
+            
+            super.update(dt);
+            
+            const enemies = this.team === 'player' ? enemyTeam : playerTeam;
+            const enemyMinions = this.team === 'player' ? enemyMinions : playerMinions;
+            
+            let target = null;
+            let minDist = this.aggroRange;
+            
+            enemyMinions.forEach(m => {
+                if (!m.isDead) {
+                    const dist = this.distanceTo(m);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = m;
+                    }
+                }
+            });
+            
+            enemies.forEach(h => {
+                if (!h.isDead) {
+                    const dist = this.distanceTo(h);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = h;
+                    }
+                }
+            });
+            
+            this.target = target;
+            
+            if (target && minDist <= this.attackRange) {
+                this.attackTarget(target);
+            }
+        }
+        
+        die(killer) {
+            this.isDestroyed = true;
+            
+            const team = killer ? killer.team : 'player';
+            const targetTeam = team === 'player' ? playerTeam : enemyTeam;
+            
+            targetTeam.forEach(h => {
+                if (!h.isDead) h.gold += 500;
+            });
+            
+            if (killer) {
+                addKillFeed(killer, this);
+            }
+            
+            checkWinCondition();
+            
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: this.x,
+                    y: this.y,
+                    vx: (Math.random() - 0.5) * 300,
+                    vy: (Math.random() - 0.5) * 300,
+                    life: 2,
+                    color: '#fbbf24',
+                    size: 15
+                });
+            }
+        }
+        
+        draw() {
+            if (this.isDestroyed) return;
+            
+            ctx.save();
+            
+            ctx.fillStyle = this.team === 'player' ? '#166534' : '#991b1b';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y - this.radius);
+            ctx.lineTo(this.x - this.radius * 0.5, this.y + this.radius * 0.5);
+            ctx.lineTo(this.x + this.radius * 0.5, this.y + this.radius * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            if (this.team !== player?.team) {
+                const distToPlayer = player ? this.distanceTo(player) : 999;
+                if (distToPlayer < 400) {
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.attackRange, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            ctx.restore();
+            
+            this.drawHpBar();
+        }
+        
+        drawHpBar() {
+            const barWidth = 60;
+            const barHeight = 8;
+            const x = this.x - barWidth / 2;
+            const y = this.y - this.radius - 20;
+            
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(x, y, barWidth, barHeight);
+            
+            const hpPercent = this.currentHp / this.maxHp;
+            ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444';
+            ctx.fillRect(x, y, barWidth * hpPercent, barHeight);
+            
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, barWidth, barHeight);
+        }
+    }
+    
+    // ============================================
+    // GAME FUNCTIONS
+    // ============================================
+    
+    function initGame() {
+        playerTeam = [];
+        enemyTeam = [];
+        projectiles = [];
+        particles = [];
+        damageNumbers = [];
+        minions = [];
+        towers = [];
+        
+        player = new Hero(200, CANVAS_HEIGHT / 2, 'player', selectedHero);
+        playerTeam.push(player);
+        
+        const allyHeroes = ['mage', 'tank', 'marksman'];
+        allyHeroes.forEach((type, i) => {
+            const hero = new Hero(200, CANVAS_HEIGHT / 2 + (i - 1) * 100, 'player', type);
+            hero.isAI = true;
+            playerTeam.push(hero);
+        });
+        
+        const enemyHeroes = ['mage', 'assassin', 'tank'];
+        enemyHeroes.forEach((type, i) => {
+            const hero = new Hero(CANVAS_WIDTH - 200, CANVAS_HEIGHT / 2 + (i - 1) * 100, 'enemy', type);
+            hero.isAI = true;
+            enemyTeam.push(hero);
+        });
+        
+        towers.push(new Tower(600, CANVAS_HEIGHT - 150, 'player', 'bottom'));
+        towers.push(new Tower(900, CANVAS_HEIGHT - 150, 'player', 'bottom'));
+        towers.push(new Tower(CANVAS_WIDTH - 600, 150, 'enemy', 'bottom'));
+        towers.push(new Tower(CANVAS_WIDTH - 900, 150, 'enemy', 'bottom'));
+        towers.push(new Tower(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 200, 'player', 'mid'));
+        towers.push(new Tower(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 200, 'enemy', 'mid'));
+        towers.push(new Tower(150, 600, 'player', 'top'));
+        towers.push(new Tower(150, 900, 'player', 'top'));
+        towers.push(new Tower(CANVAS_WIDTH - 150, CANVAS_HEIGHT - 600, 'enemy', 'top'));
+        towers.push(new Tower(CANVAS_WIDTH - 150, CANVAS_HEIGHT - 900, 'enemy', 'top'));
+        
+        spawnMinions();
+        
+        camera.x = player.x - CANVAS_WIDTH / 2;
+        camera.y = player.y - CANVAS_HEIGHT / 2;
+        
+        gameTime = 0;
+        gameState = 'playing';
+        
+        document.getElementById('gameUI').classList.add('visible');
+        document.getElementById('minimap').classList.add('visible');
+        document.getElementById('controls').classList.add('visible');
+        document.getElementById('scoreboard').classList.add('visible');
+        document.getElementById('startScreen').classList.add('hidden');
+    }
+    
+    let minionSpawnInterval;
+    function spawnMinions() {
+        clearInterval(minionSpawnInterval);
+        
+        minionSpawnInterval = setInterval(() => {
+            if (gameState !== 'playing') return;
+            
+            for (let i = 0; i < 3; i++) {
+                const minion = new Minion(250 + i * 30, CANVAS_HEIGHT / 2, 'player', i === 2 ? 'siege' : 'melee');
+                minion.targetX = CANVAS_WIDTH - 300;
+                minions.push(minion);
+            }
+            
+            const ranged = new Minion(250, CANVAS_HEIGHT / 2 + 40, 'player', 'ranged');
+            ranged.targetX = CANVAS_WIDTH - 300;
+            minions.push(ranged);
+            
+            for (let i = 0; i < 3; i++) {
+                const minion = new Minion(CANVAS_WIDTH - 250 - i * 30, CANVAS_HEIGHT / 2, 'enemy', i === 2 ? 'siege' : 'melee');
+                minion.targetX = 300;
+                minions.push(minion);
+            }
+            
+            const rangedEnemy = new Minion(CANVAS_WIDTH - 250, CANVAS_HEIGHT / 2 - 40, 'enemy', 'ranged');
+            rangedEnemy.targetX = 300;
+            minions.push(rangedEnemy);
+        }, 30000);
+    }
+    
+    function update(dt) {
+        if (gameState !== 'playing') return;
+        
+        gameTime += dt;
+        
+        updatePlayer(dt);
+        
+        playerTeam.forEach(h => h.update(dt));
+        enemyTeam.forEach(h => h.update(dt));
+        minions.forEach(m => m.update(dt));
+        towers.forEach(t => t.update(dt));
+        
+        updateProjectiles(dt);
+        updateParticles(dt);
+        updateDamageNumbers(dt);
+        updateCamera();
+        updateUI();
+        
+        minions = minions.filter(m => !m.isDead || m.deathTime > 0);
+        minions.forEach(m => {
+            if (m.isDead) {
+                m.deathTime = (m.deathTime || 0) + dt;
             }
         });
-
-        // Smooth scroll for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
+        
+        playerTeam.forEach(h => {
+            if (h !== player && h.isAI) {
+                updateAI(h, dt);
+            }
+        });
+        
+        enemyTeam.forEach(h => {
+            if (h.isAI) {
+                updateAI(h, dt);
+            }
+        });
+    }
+    
+    function updatePlayer(dt) {
+        if (player.isDead) return;
+        
+        let dx = 0, dy = 0;
+        if (keys['w'] || keys['arrowup']) dy -= 1;
+        if (keys['s'] || keys['arrowdown']) dy += 1;
+        if (keys['a'] || keys['arrowleft']) dx -= 1;
+        if (keys['d'] || keys['arrowright']) dx += 1;
+        
+        if (dx !== 0 || dy !== 0) {
+            const len = Math.sqrt(dx * dx + dy * dy);
+            player.x += (dx / len) * player.moveSpeed;
+            player.y += (dy / len) * player.moveSpeed;
+            
+            player.x = Math.max(20, Math.min(CANVAS_WIDTH - 20, player.x));
+            player.y = Math.max(20, Math.min(CANVAS_HEIGHT - 20, player.y));
+        }
+        
+        if (keys[' ']) {
+            autoAttack();
+        }
+    }
+    
+    function autoAttack() {
+        if (!player || player.isDead) return;
+        
+        let nearestEnemy = null;
+        let minDist = Infinity;
+        
+        const allEnemies = [...enemyTeam, ...minions.filter(m => m.team === 'enemy')];
+        allEnemies.forEach(e => {
+            if (!e.isDead) {
+                const dist = player.distanceTo(e);
+                if (dist < minDist && dist < player.attackRange * 1.5) {
+                    minDist = dist;
+                    nearestEnemy = e;
+                }
+            }
+        });
+        
+        if (nearestEnemy) {
+            player.target = nearestEnemy;
+            player.attackTarget(nearestEnemy);
+        }
+    }
+    
+    function updateAI(hero, dt) {
+        if (hero.isDead) return;
+        
+        let nearestEnemy = null;
+        let minDist = Infinity;
+        
+        const allEnemies = [...(hero.team === 'player' ? enemyTeam : playerTeam), 
+                          ...minions.filter(m => m.team !== hero.team)];
+        
+        allEnemies.forEach(e => {
+            if (!e.isDead) {
+                const dist = hero.distanceTo(e);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestEnemy = e;
+                }
+            }
+        });
+        
+        if (nearestEnemy) {
+            hero.target = nearestEnemy;
+            
+            if (minDist > hero.attackRange) {
+                const dx = nearestEnemy.x - hero.x;
+                const dy = nearestEnemy.y - hero.y;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                hero.x += (dx / len) * hero.moveSpeed * 0.8;
+                hero.y += (dy / len) * hero.moveSpeed * 0.8;
+            }
+            
+            if (minDist <= hero.attackRange && hero.attackCooldown <= 0) {
+                hero.attackTarget(nearestEnemy);
+            }
+            
+            if (Math.random() < 0.02 && hero.skillCooldowns[0] <= 0) {
+                hero.useSkill(0);
+            }
+        }
+    }
+    
+    function updateProjectiles(dt) {
+        projectiles.forEach(p => {
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            
+            const targets = p.owner.team === 'player' ? enemyTeam : playerTeam;
+            targets.forEach(e => {
+                if (!e.isDead && !p.hit) {
+                    const dist = Math.sqrt((p.x - e.x) ** 2 + (p.y - e.y) ** 2);
+                    if (dist < p.radius + e.radius) {
+                        e.takeDamage(p.damage, p.owner);
+                        p.hit = true;
+                        
+                        for (let i = 0; i < 10; i++) {
+                            particles.push({
+                                x: p.x,
+                                y: p.y,
+                                vx: (Math.random() - 0.5) * 150,
+                                vy: (Math.random() - 0.5) * 150,
+                                life: 0.5,
+                                color: p.color,
+                                size: 5
+                            });
+                        }
+                    }
+                }
+            });
+            
+            minions.forEach(m => {
+                if (!m.isDead && !p.hit && m.team !== p.owner.team) {
+                    const dist = Math.sqrt((p.x - m.x) ** 2 + (p.y - m.y) ** 2);
+                    if (dist < p.radius + m.radius) {
+                        m.takeDamage(p.damage, p.owner);
+                        p.hit = true;
+                    }
                 }
             });
         });
-
-        // Intersection Observer for animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animation = 'fadeInUp 0.6s ease-out forwards';
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.stat-card, .feature-card').forEach(card => {
-            card.style.opacity = '0';
-            observer.observe(card);
+        
+        projectiles = projectiles.filter(p => p.life > 0 && !p.hit);
+    }
+    
+    function updateParticles(dt) {
+        particles.forEach(p => {
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            p.vy += 200 * dt;
         });
+        
+        particles = particles.filter(p => p.life > 0);
+    }
+    
+    function updateDamageNumbers(dt) {
+        damageNumbers.forEach(d => {
+            d.y -= 50 * dt;
+            d.life -= dt;
+        });
+        
+        damageNumbers = damageNumbers.filter(d => d.life > 0);
+    }
+    
+    function updateCamera() {
+        if (!player) return;
+        
+        const targetX = player.x - CANVAS_WIDTH / 2;
+        const targetY = player.y - CANVAS_HEIGHT / 2;
+        
+        camera.x += (targetX - camera.x) * 0.1;
+        camera.y += (targetY - camera.y) * 0.1;
+        
+        camera.x = Math.max(0, Math.min(CANVAS_WIDTH - CANVAS_WIDTH, camera.x));
+        camera.y = Math.max(0, Math.min(CANVAS_HEIGHT - CANVAS_HEIGHT, camera.y));
+    }
+    
+    function updateUI() {
+        if (!player) return;
+        
+        const hpPercent = (player.currentHp / player.maxHp) * 100;
+        document.getElementById('playerHpFill').style.width = hpPercent + '%';
+        document.getElementById('playerHpText').textContent = 
+            Math.round(player.currentHp) + ' / ' + player.maxHp;
+        
+        document.getElementById('playerLevel').textContent = 'LV ' + player.level;
+        document.getElementById('playerGold').textContent = Math.round(player.gold);
+        document.getElementById('playerKills').textContent = player.kills;
+        
+        document.getElementById('playerScore').textContent = playerTeam.filter(h => !h.isDead).length;
+        document.getElementById('enemyScore').textContent = enemyTeam.filter(h => !h.isDead).length;
+    }
+    
+    function draw() {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        
+        drawMap();
+        drawLanes();
+        drawJungle();
+        
+        towers.forEach(t => t.draw());
+        minions.forEach(m => m.draw());
+        playerTeam.forEach(h => h.draw());
+        enemyTeam.forEach(h => h.draw());
+        
+        projectiles.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x - p.vx * 0.05, p.y - p.vy * 0.05);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        });
+        
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        
+        damageNumbers.forEach(d => {
+            ctx.globalAlpha = d.life;
+            ctx.fillStyle = d.color;
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('-' + d.value, d.x, d.y);
+        });
+        ctx.globalAlpha = 1;
+        
+        drawMinimap();
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(formatTime(gameTime), CANVAS_WIDTH / 2, 30);
+    }
+    
+    function drawMap() {
+        ctx.fillStyle = '#1a472a';
+        
+        ctx.fillRect(0, 0, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.3);
+        ctx.fillRect(CANVAS_WIDTH * 0.7, 0, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.3);
+        ctx.fillRect(0, CANVAS_HEIGHT * 0.7, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.3);
+        ctx.fillRect(CANVAS_WIDTH * 0.7, CANVAS_HEIGHT * 0.7, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.3);
+        
+        ctx.fillStyle = '#1e40af';
+        ctx.fillRect(CANVAS_WIDTH * 0.4, CANVAS_HEIGHT * 0.4, CANVAS_WIDTH * 0.2, CANVAS_HEIGHT * 0.2);
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < CANVAS_WIDTH; x += TILE_SIZE) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, CANVAS_HEIGHT);
+            ctx.stroke();
+        }
+        for (let y = 0; y < CANVAS_HEIGHT; y += TILE_SIZE) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(CANVAS_WIDTH, y);
+            ctx.stroke();
+        }
+    }
+    
+    function drawLanes() {
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 60;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        ctx.beginPath();
+        ctx.moveTo(100, CANVAS_HEIGHT / 2);
+        ctx.lineTo(CANVAS_WIDTH - 100, CANVAS_HEIGHT / 2);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(100, CANVAS_HEIGHT / 2);
+        ctx.lineTo(100, 100);
+        ctx.lineTo(CANVAS_WIDTH - 100, 100);
+        ctx.lineTo(CANVAS_WIDTH - 100, CANVAS_HEIGHT / 2);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(100, CANVAS_HEIGHT / 2);
+        ctx.lineTo(100, CANVAS_HEIGHT - 100);
+        ctx.lineTo(CANVAS_WIDTH - 100, CANVAS_HEIGHT - 100);
+        ctx.lineTo(CANVAS_WIDTH - 100, CANVAS_HEIGHT / 2);
+        ctx.stroke();
+        
+        ctx.lineCap = 'butt';
+    }
+    
+    function drawJungle() {
+        const camps = [
+            { x: 300, y: 300, name: 'Red Buff' },
+            { x: CANVAS_WIDTH - 300, y: CANVAS_HEIGHT - 300, name: 'Blue Buff' },
+            { x: 300, y: CANVAS_HEIGHT - 300, name: 'Wolf' },
+            { x: CANVAS_WIDTH - 300, y: 300, name: 'Raptor' }
+        ];
+        
+        camps.forEach(camp => {
+            ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+            ctx.beginPath();
+            ctx.arc(camp.x, camp.y, 25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+    }
+    
+    function drawMinimap() {
+        const scaleX = minimapCanvas.width / CANVAS_WIDTH;
+        const scaleY = minimapCanvas.height / CANVAS_HEIGHT;
+        
+        minimapCtx.fillStyle = '#0f172a';
+        minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+        
+        minimapCtx.strokeStyle = '#334155';
+        minimapCtx.lineWidth = 2;
+        
+        minimapCtx.beginPath();
+        minimapCtx.moveTo(200 * scaleX, 150 * scaleY);
+        minimapCtx.lineTo(1000 * scaleX, 150 * scaleY);
+        minimapCtx.stroke();
+        
+        towers.forEach(t => {
+            if (t.isDestroyed) return;
+            minimapCtx.fillStyle = t.team === 'player' ? '#22c55e' : '#ef4444';
+            minimapCtx.beginPath();
+            minimapCtx.arc(t.x * scaleX, t.y * scaleY, 5, 0, Math.PI * 2);
+            minimapCtx.fill();
+        });
+        
+        minions.forEach(m => {
+            if (m.isDead) return;
+            minimapCtx.fillStyle = m.team === 'player' ? '#22c55e' : '#ef4444';
+            minimapCtx.beginPath();
+            minimapCtx.arc(m.x * scaleX, m.y * scaleY, 2, 0, Math.PI * 2);
+            minimapCtx.fill();
+        });
+        
+        playerTeam.forEach(h => {
+            if (h.isDead) return;
+            minimapCtx.fillStyle = '#22c55e';
+            minimapCtx.beginPath();
+            minimapCtx.arc(h.x * scaleX, h.y * scaleY, 4, 0, Math.PI * 2);
+            minimapCtx.fill();
+        });
+        
+        enemyTeam.forEach(h => {
+            if (h.isDead) return;
+            minimapCtx.fillStyle = '#ef4444';
+            minimapCtx.beginPath();
+            minimapCtx.arc(h.x * scaleX, h.y * scaleY, 4, 0, Math.PI * 2);
+            minimapCtx.fill();
+        });
+        
+        minimapCtx.strokeStyle = '#fff';
+        minimapCtx.lineWidth = 1;
+        minimapCtx.strokeRect(
+            camera.x * scaleX,
+            camera.y * scaleY,
+            CANVAS_WIDTH * scaleX,
+            CANVAS_HEIGHT * scaleY
+        );
+    }
+    
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+    }
+    
+    function addKillFeed(killer, victim) {
+        const feed = document.getElementById('killFeed');
+        const entry = document.createElement('div');
+        entry.className = 'kill-entry';
+        entry.innerHTML = `<span style="color: ${killer.team === 'player' ? '#22c55e' : '#ef4444'}">${killer.name || killer.icon || '⚔️'}</span> killed <span style="color: ${victim.team === 'player' ? '#22c55e' : '#ef4444'}">${victim.name || victim.icon || '⚔️'}</span>`;
+        feed.appendChild(entry);
+        
+        setTimeout(() => entry.remove(), 5000);
+        
+        while (feed.children.length > 5) {
+            feed.removeChild(feed.firstChild);
+        }
+    }
+    
+    function checkWinCondition() {
+        const enemyTowers = towers.filter(t => t.team === 'enemy' && !t.isDestroyed);
+        const playerTowers = towers.filter(t => t.team === 'player' && !t.isDestroyed);
+        
+        if (enemyTowers.length === 0) {
+            endGame(true);
+        } else if (playerTowers.length === 0) {
+            endGame(false);
+        }
+    }
+    
+    function endGame(victory) {
+        gameState = 'gameover';
+        
+        const gameOverScreen = document.getElementById('gameOver');
+        gameOverScreen.classList.add('visible');
+        gameOverScreen.classList.remove('victory', 'defeat');
+        gameOverScreen.classList.add(victory ? 'victory' : 'defeat');
+        
+        document.getElementById('gameOverTitle').textContent = victory ? 'VICTORY!' : 'DEFEAT';
+        document.getElementById('gameOverStats').textContent = 
+            `Kills: ${player?.kills || 0} | Gold: ${Math.round(player?.gold || 0)} | Level: ${player?.level || 1}`;
+    }
+    
+    // ============================================
+    // INPUT HANDLING
+    // ============================================
+    
+    document.addEventListener('keydown', e => {
+        keys[e.key.toLowerCase()] = true;
+        
+        if (gameState === 'playing' && player && !player.isDead) {
+            if (e.key.toLowerCase() === 'q') player.useSkill(0);
+            if (e.key.toLowerCase() === 'e') player.useSkill(1);
+            if (e.key.toLowerCase() === 'r') player.useUltimate();
+            if (e.key.toLowerCase() === 't') player.target = null;
+        }
+    });
+    
+    document.addEventListener('keyup', e => {
+        keys[e.key.toLowerCase()] = false;
+    });
+    
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mousePos.x = e.clientX - rect.left;
+        mousePos.y = e.clientY - rect.top;
+        
+        mouseWorldPos.x = mousePos.x;
+        mouseWorldPos.y = mousePos.y;
+    });
+    
+    canvas.addEventListener('click', e => {
+        if (gameState !== 'playing' || !player || player.isDead) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const allEntities = [...playerTeam, ...enemyTeam, ...minions];
+        let clickedEntity = null;
+        let minDist = 30;
+        
+        allEntities.forEach(e => {
+            if (e.isDead) return;
+            const dist = Math.sqrt((x - e.x) ** 2 + (y - e.y) ** 2);
+            if (dist < minDist) {
+                minDist = dist;
+                clickedEntity = e;
+            }
+        });
+        
+        if (clickedEntity && clickedEntity.team !== 'player') {
+            player.target = clickedEntity;
+            
+            if (player.distanceTo(clickedEntity) <= player.attackRange) {
+                player.attackTarget(clickedEntity);
+            }
+        } else {
+            player.target = null;
+        }
+    });
+    
+    document.querySelectorAll('.hero-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.hero-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedHero = card.dataset.hero;
+        });
+    });
+    
+    document.getElementById('startBtn').addEventListener('click', () => {
+        initGame();
+        requestAnimationFrame(gameLoop);
+    });
+    
+    // ============================================
+    // GAME LOOP
+    // ============================================
+    
+    function gameLoop(timestamp) {
+        const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
+        lastTime = timestamp;
+        
+        update(dt);
+        draw();
+        
+        if (gameState === 'playing') {
+            requestAnimationFrame(gameLoop);
+        }
+    }
+    
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
+    ctx.fillStyle = '#fff';
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('NEXUS ARENA', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+    ctx.font = '16px sans-serif';
+    ctx.fillText('Select a hero and click START', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 40);
+    
     </script>
 </body>
 </html>
