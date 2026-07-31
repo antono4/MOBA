@@ -1,4 +1,1 @@
-# MOBA Target Lock System
-
-> **Created by Antono**
-
+Last updated: 2026-07-31 15:34:34 WIB
