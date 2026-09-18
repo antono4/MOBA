@@ -10,8 +10,8 @@
 <p align="center">
   <a href="https://github.com/antono4/MOBA"><img alt="GitHub repo" src="https://img.shields.io/badge/GitHub-antono4/MOBA-blue?logo=github"></a>
   <a href="https://antono4.github.io/MOBA/"><img alt="Live Demo" src="https://img.shields.io/badge/Live%20Demo-Online-success?logo=githubpages"></a>
-  <img alt="Files" src="https://img.shields.io/badge/Files-15-informational">
-  <img alt="Updated" src="https://img.shields.io/badge/Updated-2026-09-16 07:37:48 WIB-lightgrey">
+  <img alt="Files" src="https://img.shields.io/badge/Files-13-informational">
+  <img alt="Updated" src="https://img.shields.io/badge/Updated-2026-09-18 08:42:04 WIB-lightgrey">
 </p>
 
 ---
@@ -35,7 +35,7 @@ Berdasarkan isi repository, proyek ini menggunakan:
 
 - `HTML`
 
-> Total **15 file** terdeteksi di repository.
+> Total **13 file** terdeteksi di repository.
 
 ## 🚀 Menjalankan Secara Lokal
 
@@ -61,5 +61,4 @@ Lihat berkas [`LICENSE`](./LICENSE) untuk informasi lisensi.
 
 ---
 
-<sub>README ini di-generate otomatis pada **2026-09-16 07:37:48 WIB** oleh GitHub Actions `.github/workflows/generate-readme.yml`.</sub>
-Last updated: 2026-09-16 08:20:57 WIB
+<sub>README ini di-generate otomatis pada **2026-09-18 08:42:04 WIB** oleh GitHub Actions `.github/workflows/generate-readme.yml`.</sub>
