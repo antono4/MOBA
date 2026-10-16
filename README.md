@@ -1,1 +1,26 @@
-Last updated: 2026-10-17 04:32:23 WIB
+# MOBA
+
+
+
+## 📋 Overview
+
+This repository contains **27 files** and is built with the following technologies:
+
+HTML
+
+## 🚀 Quick Start
+
+## ✨ Features
+
+- 📝 Auto-generated documentation
+
+## 🛠️ Technologies
+
+HTML
+
+## 📄 License
+
+MIT License
+
+---
+*Last updated: 2026-10-17 04:44:02 WIB*
